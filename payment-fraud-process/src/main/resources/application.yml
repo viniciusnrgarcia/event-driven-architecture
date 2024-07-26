@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: payment-producer
+#  kafka:
+#    bootstrap-servers: "127.0.0.1:9092"
+    # Configuration for consumer
+#    producer:
+#      transactional-id-prefix: payment
+#      value-serializer: "org.springframework.kafka.support.serializer.JsonSerializer"
+#      properties:
+#        "[spring.json.add.type.headers]": false
+
+#    consumer:
+      # group-id: "payment-producer"
+#      auto-offset-reset: earliest
+#      enable-auto-commit: false
+#      value-deserializer: "org.springframework.kafka.support.serializer.JsonDeserializer"
+#      properties:
+#        "[spring.json.value.default.type]": "com.example.Invoice"
+#        "[spring.json.trusted.packages]": "com.example.main,com.example.another"

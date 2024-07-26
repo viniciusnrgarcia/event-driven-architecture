@@ -1,0 +1,87 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: payment-api
+  main:
+    banner-mode: OFF
+#  kafka:
+#    bootstrap-servers: "127.0.0.1:9092"
+    # Configuration for consumer
+#    producer:
+#      transactional-id-prefix: payment
+#      value-serializer: "org.springframework.kafka.support.serializer.JsonSerializer"
+#      properties:
+#        "[spring.json.add.type.headers]": false
+
+#    consumer:
+      # group-id: "payment-producer"
+#      auto-offset-reset: earliest
+#      enable-auto-commit: false
+#      value-deserializer: "org.springframework.kafka.support.serializer.JsonDeserializer"
+#      properties:
+#        "[spring.json.value.default.type]": "com.example.Invoice"
+#        "[spring.json.trusted.packages]": "com.example.main,com.example.another"
+
+
+  datasource:
+    hikari:
+      connectionTimeout: ${HIKARI_MAXIMUM_CON_TIMEOUT:5000}
+      maximumPoolSize: ${HIKARI_MAXIMUM_POOL_SIZE:10}
+      minimum-idle: 10
+      idle-timeout: 20000
+      idleTimeout: ${HIKARI_IDLE_TIMEOUT:600000}
+      max-lifetime: 30000 # maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      auto-commit: true #default auto-commit behavior.
+      # https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+    driver-class-name: org.postgresql.Driver
+    testWhileIdle: 'true'
+    password: ${DATASOURCE_PASSWORD:123}
+    username: ${DATASOURCE_USERNAME:admin}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/paymentdb?useSSL=false}
+    validationQuery: SELECT 1
+
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: "*"
+    web:
+      expose:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+
+#  jackson:
+#    mapper:
+#      DEFAULT_VIEW_INCLUSION: true
+#    serialization:
+#      indent_output: true
+#      WRITE_DATES_AS_TIMESTAMPS: false
+#    deserialization:
+#      FAIL_ON_IGNORED_PROPERTIES: false
+#      FAIL_ON_UNKNOWN_PROPERTIES: false
+#      ACCEPT_SINGLE_VALUE_AS_ARRAY: true
+#    default-property-inclusion: non_empty
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO} # INFO, DEBUG, ERROR
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    br.com.vnrg: ${LOG_LEVEL_PACKAGE:INFO}

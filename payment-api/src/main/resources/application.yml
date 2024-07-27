@@ -7,7 +7,7 @@ spring:
   main:
     banner-mode: OFF
 #  kafka:
-#    bootstrap-servers: "127.0.0.1:9092"
+#    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093}
     # Configuration for consumer
 #    producer:
 #      transactional-id-prefix: payment
@@ -82,6 +82,10 @@ management:
 
 logging:
   level:
-    root: ${LOG_LEVEL:INFO} # INFO, DEBUG, ERROR
-    org.springframework: ${LOG_LEVEL_SPRING:INFO}
-    br.com.vnrg: ${LOG_LEVEL_PACKAGE:INFO}
+    root: ${LOG_LEVEL:ERROR} # INFO, DEBUG, ERROR
+    org.springframework: ${LOG_LEVEL_SPRING:ERROR}
+    br.com.vnrg: ${LOG_LEVEL_PACKAGE:ERROR}
+
+environment:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093}

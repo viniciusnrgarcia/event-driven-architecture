@@ -81,9 +81,16 @@ public class PaymentController {
     }
 
     @PostMapping(path = "/payment-id")
-    public ResponseEntity<Void> createPaymentWithId(@RequestBody Payment payment) throws JsonProcessingException {
+    public ResponseEntity<Void> createPaymentId(@RequestBody Payment payment) {
+
         try {
             this.paymentRepository.save(payment, payment.id());
+        } catch (Exception e) {
+            log.error("Transaction ID: {}, Error: {}", payment.transactionId(), e.getMessage());
+            // ignore exception to duplicate events in topic
+        }
+
+        try {
             var json = mapper.writeValueAsString(payment);
             this.logRepository.save(new Log(payment.id(), "payment-api", mapper.writeValueAsString(payment)));
             this.fraudProcessProducer.sendMessage(payment.id(), json);

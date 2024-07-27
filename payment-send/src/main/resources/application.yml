@@ -102,3 +102,8 @@ logging:
     root: ${LOG_LEVEL:INFO} # INFO, DEBUG, ERROR
     org.springframework: ${LOG_LEVEL_SPRING:INFO}
     br.com.vnrg: ${LOG_LEVEL_PACKAGE:INFO}
+
+
+environment:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9093}

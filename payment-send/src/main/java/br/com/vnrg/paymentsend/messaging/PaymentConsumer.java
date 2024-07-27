@@ -1,6 +1,9 @@
 package br.com.vnrg.paymentsend.messaging;
 
+import br.com.vnrg.paymentsend.domain.Log;
 import br.com.vnrg.paymentsend.domain.Payment;
+import br.com.vnrg.paymentsend.enums.PaymentStatus;
+import br.com.vnrg.paymentsend.repository.LogRepository;
 import br.com.vnrg.paymentsend.repository.PaymentErrorRepository;
 import br.com.vnrg.paymentsend.repository.PaymentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +24,7 @@ public class PaymentConsumer {
 
     private final PaymentRepository paymentRepository;
     private final PaymentErrorRepository paymentErrorRepository;
+    private final LogRepository logRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @KafkaListener(id = "payment-send-id",
@@ -31,20 +35,25 @@ public class PaymentConsumer {
 //    @Transactional("paymentTransactionManager")
     public void listen(String message, Acknowledgment ack, @Headers Map<String, Object> headers) {
         try {
-            var messageKey = (String) headers.get(KafkaHeaders.KEY);
             var payment = this.mapper.readValue(message, Payment.class);
+            var messageKey = (String) headers.get(KafkaHeaders.KEY);
+            this.logRepository.save(new Log(payment.id(), "payment-send", mapper.writeValueAsString(payment)));
 
             log.info("Consumed message key: {} message content: {} ", messageKey, message);
 
-            var rowsAffected = this.paymentRepository.updateStatus(payment, 2);
+            // Atualiza para em processamento
+            // exactly once commit
+            var rowsAffected = this.paymentRepository.updateStatus(payment, PaymentStatus.PROCESSING);
+
             if (rowsAffected == 1) {
-                log.info("Transaction ID: {}, Status: {}", payment.transactionId(), payment.status());
-                ack.acknowledge();
+                // processamento do evento e controle de status
+                this.sendPayment(payment);
 
             } else {
+                // se evento já processado, ou com status indisponível para pagamento ignora o mesmo
                 log.error("Transaction ID: {}, Status: {}", payment.transactionId(), payment.status());
                 this.paymentErrorRepository.save(payment);
-                this.paymentRepository.updateStatus(payment, 3); // erro
+                this.logRepository.save(new Log(payment.id(), "payment-send", mapper.writeValueAsString(payment)));
             }
 
         } catch (Exception e) {
@@ -53,6 +62,31 @@ public class PaymentConsumer {
 
         } finally {
             ack.acknowledge();
+        }
+    }
+
+    private void sendPayment(Payment payment) {
+        try {
+            // TODO send payment
+            // business rules
+
+            // teste error
+            if (payment.id() >= 999999) {
+                log.error("payment integration error: {}", payment.id());
+                throw new RuntimeException("payment error");
+            }
+
+            // Atualiza para pagamento enviado
+            this.paymentRepository.updateStatus(payment, PaymentStatus.SENT);
+
+            var paymentSend = new Payment(payment.id(), payment.amount(), payment.customerId(), payment.transactionId(), PaymentStatus.SENT.getValue());
+            this.logRepository.save(new Log(payment.id(), "payment-send", mapper.writeValueAsString(paymentSend)));
+            log.info("Transaction ID: {}, Status: {}", payment.transactionId(), payment.status());
+
+        } catch (Exception e) {
+            log.error("Error send Payment: {}", e.getMessage());
+            this.paymentRepository.updateStatus(payment, PaymentStatus.ERROR);
+            throw new RuntimeException(e);
         }
     }
 

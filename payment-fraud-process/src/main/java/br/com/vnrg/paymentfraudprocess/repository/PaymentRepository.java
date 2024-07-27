@@ -1,7 +1,7 @@
-package br.com.vnrg.paymentsend.repository;
+package br.com.vnrg.paymentfraudprocess.repository;
 
-import br.com.vnrg.paymentsend.domain.Payment;
-import br.com.vnrg.paymentsend.enums.PaymentStatus;
+import br.com.vnrg.paymentfraudprocess.domain.Payment;
+import br.com.vnrg.paymentfraudprocess.enums.PaymentStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -61,7 +61,7 @@ public class PaymentRepository {
     @Transactional
     public int updateStatus(Payment payment, PaymentStatus status) {
         try {
-            return this.jdbcClient.sql("UPDATE payment SET status = :status WHERE id = :id and status not in(4, 6)")
+            return this.jdbcClient.sql("UPDATE payment SET status = :status WHERE id = :id and status not in(4, 6)") // enviado pagamento, pago
                     .param("status", status.getValue())
                     .param("id", payment.id())
                     .update();

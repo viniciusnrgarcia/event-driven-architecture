@@ -11,13 +11,13 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class PaymentProducer {
+public class FraudProcessProducer {
 
     private final KafkaTemplate<Long, String> kafkaTemplate;
 
     public void sendMessage(Long key, String message) {
         try {
-            CompletableFuture<SendResult<Long, String>> future = kafkaTemplate.send("payment-send", key, message);
+            CompletableFuture<SendResult<Long, String>> future = kafkaTemplate.send("payment-fraud-process", key, message);
             future.whenComplete((result, ex) -> {
                 if (ex == null) {
                     log.info("sent message='{}' with offset={}", message, result.getRecordMetadata().offset());

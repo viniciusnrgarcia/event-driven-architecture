@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
@@ -19,6 +20,7 @@ public class PaymentRepository {
         this.jdbcClient = jdbcClient;
     }
 
+    @Transactional
     public Long save(Payment payment) {
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -45,4 +47,31 @@ public class PaymentRepository {
         }
 
     }
+
+
+    @Transactional
+    public void save(Payment payment, long id) {
+        try {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+
+            var result = this.jdbcClient.sql("""
+                              INSERT INTO payment (id, amount, customer_id, transaction_id, status)
+                              VALUES (
+                              :id, :amount, :customerId, :transactionId, :status)
+                            """
+                    )
+                    .param("id", id)
+                    .param("amount", payment.amount())
+                    .param("customerId", payment.customerId())
+                    .param("transactionId", payment.transactionId())
+                    .param("status", payment.status())
+                    .update();
+
+        } catch (Exception e) {
+            log.error("Error: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+    }
+
 }

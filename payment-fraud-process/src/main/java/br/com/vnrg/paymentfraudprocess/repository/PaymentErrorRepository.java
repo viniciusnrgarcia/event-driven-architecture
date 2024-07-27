@@ -1,6 +1,6 @@
-package br.com.vnrg.paymentsend.repository;
+package br.com.vnrg.paymentfraudprocess.repository;
 
-import br.com.vnrg.paymentsend.domain.Payment;
+import br.com.vnrg.paymentfraudprocess.domain.Payment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;

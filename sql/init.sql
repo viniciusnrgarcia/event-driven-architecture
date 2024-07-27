@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS payment_error (
     id INTEGER NULL,
     amount DECIMAL(20, 2) NULL,
     customer_id INTEGER NULL,
-    transaction_id INTEGER,
-    status INTEGER
+    transaction_id INTEGER null,
+    status INTEGER null
 );
 
 
@@ -42,3 +42,17 @@ CREATE INDEX idx_customer_id_1 ON payment_transaction(customer_id);
 --    (5, -500000, 0);
 
 -- id SERIAL PRIMARY KEY,
+
+
+CREATE TABLE IF NOT EXISTS log (
+    id INTEGER NULL,
+    created_at timestamp with time zone default current_timestamp,
+    created_by varchar(100) null,
+    json JSONB null
+);
+
+
+CREATE TABLE json_data (
+    id SERIAL PRIMARY KEY,
+    data JSONB NOT NULL
+);

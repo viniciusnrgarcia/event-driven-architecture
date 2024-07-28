@@ -1,6 +1,6 @@
-package br.com.vnrg.payment.repository;
+package br.com.vnrg.fraud.repository;
 
-import br.com.vnrg.payment.domain.Payment;
+import br.com.vnrg.fraud.domain.Payment;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -26,10 +26,10 @@ public class PaymentRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             var result = this.jdbcClient.sql("""
-                              INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description)
+                              INSERT INTO payment (id, amount, customer_id, transaction_id, status)
                               VALUES (
                               (SELECT nextval('payment_id_seq')),
-                              :amount, :customerId, :transactionId, :status, :statusDescription)
+                              :amount, :customerId, :transactionId, :status)
                             """
                     )
                     //.param("id", null)
@@ -37,13 +37,12 @@ public class PaymentRepository {
                     .param("customerId", payment.customerId())
                     .param("transactionId", payment.transactionId())
                     .param("status", payment.status())
-                    .param("statusDescription", payment.statusDescription())
                     .update(keyHolder, "id");
 
             return Objects.requireNonNull(keyHolder.getKey()).longValue();
 
         } catch (Exception e) {
-            log.error("Error save payment: {}", e.getMessage());
+            log.error("Error: {}", e.getMessage());
             throw new RuntimeException(e);
         }
 
@@ -56,9 +55,9 @@ public class PaymentRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             var result = this.jdbcClient.sql("""
-                              INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description)
+                              INSERT INTO payment (id, amount, customer_id, transaction_id, status)
                               VALUES (
-                              :id, :amount, :customerId, :transactionId, :status, :statusDescription)
+                              :id, :amount, :customerId, :transactionId, :status)
                             """
                     )
                     .param("id", id)
@@ -66,11 +65,10 @@ public class PaymentRepository {
                     .param("customerId", payment.customerId())
                     .param("transactionId", payment.transactionId())
                     .param("status", payment.status())
-                    .param("statusDescription", payment.statusDescription())
                     .update();
 
         } catch (Exception e) {
-            log.error("Error save payment with id: {}", e.getMessage());
+            log.error("Error: {}", e.getMessage());
             throw new RuntimeException(e);
         }
 

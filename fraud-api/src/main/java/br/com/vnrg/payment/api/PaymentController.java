@@ -1,11 +1,10 @@
-package br.com.vnrg.payment.api;
+package br.com.vnrg.fraud.api;
 
-import br.com.vnrg.payment.domain.Log;
-import br.com.vnrg.payment.domain.Payment;
-import br.com.vnrg.payment.enums.PaymentStatus;
-import br.com.vnrg.payment.messaging.FraudProcessProducer;
-import br.com.vnrg.payment.repository.LogRepository;
-import br.com.vnrg.payment.repository.PaymentRepository;
+import br.com.vnrg.fraud.domain.Log;
+import br.com.vnrg.fraud.domain.Payment;
+import br.com.vnrg.fraud.messaging.FraudProcessProducer;
+import br.com.vnrg.fraud.repository.LogRepository;
+import br.com.vnrg.fraud.repository.PaymentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +29,8 @@ public class PaymentController {
     public ResponseEntity<Void> createPayment(@RequestBody Payment payment) throws JsonProcessingException {
         try {
             var id = this.paymentRepository.save(payment);
-            var paymentCreated = new Payment(id, payment.amount(), payment.customerId(), payment.transactionId(), payment.status(),
-                    PaymentStatus.fromValue(payment.status()).name());
-            this.logRepository.save(new Log(id, "payment-api", mapper.writeValueAsString(paymentCreated)));
+            var paymentCreated = new Payment(id, payment.amount(), payment.customerId(), payment.transactionId(), payment.status());
+            this.logRepository.save(new Log(id, "fraud-api", mapper.writeValueAsString(paymentCreated)));
             var json = mapper.writeValueAsString(paymentCreated);
             this.fraudProcessProducer.sendMessage(id, json);
             log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
@@ -49,7 +47,7 @@ public class PaymentController {
     public ResponseEntity<Void> createManualPayment(@RequestBody Payment payment) throws JsonProcessingException {
         try {
             var json = mapper.writeValueAsString(payment);
-            this.logRepository.save(new Log(payment.id(), "payment-api", mapper.writeValueAsString(payment)));
+            this.logRepository.save(new Log(payment.id(), "fraud-api", mapper.writeValueAsString(payment)));
             this.fraudProcessProducer.sendMessage(payment.id(), json);
             log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
 
@@ -67,8 +65,8 @@ public class PaymentController {
         try {
             for (int i = 0; i < events; i++) {
                 var id = this.paymentRepository.save(payment);
-                this.logRepository.save(new Log(id, "payment-api", mapper.writeValueAsString(payment)));
-                var paymentCreated = new Payment(id, payment.amount(), payment.customerId(), payment.transactionId(), payment.status(), payment.statusDescription());
+                this.logRepository.save(new Log(id, "fraud-api", mapper.writeValueAsString(payment)));
+                var paymentCreated = new Payment(id, payment.amount(), payment.customerId(), payment.transactionId(), payment.status());
                 var json = mapper.writeValueAsString(paymentCreated);
                 this.fraudProcessProducer.sendMessage(id, json);
                 log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
@@ -99,7 +97,7 @@ public class PaymentController {
 
         try {
             var json = mapper.writeValueAsString(payment);
-            this.logRepository.save(new Log(payment.id(), "payment-api", mapper.writeValueAsString(payment)));
+            this.logRepository.save(new Log(payment.id(), "fraud-api", mapper.writeValueAsString(payment)));
             this.fraudProcessProducer.sendMessage(payment.id(), json);
             log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
 

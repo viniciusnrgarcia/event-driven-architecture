@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS payment (
     amount DECIMAL(20, 2) NOT NULL,
     customer_id INTEGER NOT NULL,
     transaction_id INTEGER,
-    status INTEGER
+    status INTEGER,
+    status_description VARCHAR(50) NULL
 );
 
 CREATE TABLE IF NOT EXISTS payment_error (
@@ -15,7 +16,8 @@ CREATE TABLE IF NOT EXISTS payment_error (
     amount DECIMAL(20, 2) NULL,
     customer_id INTEGER NULL,
     transaction_id INTEGER null,
-    status INTEGER null
+    status INTEGER null,
+    status_description VARCHAR(50) NULL
 );
 
 
@@ -25,7 +27,8 @@ CREATE TABLE IF NOT EXISTS payment_transaction (
     amount DECIMAL(20, 2) NOT NULL,
     customer_id INTEGER NOT NULL,
     transaction_id INTEGER,
-    status INTEGER
+    status INTEGER,
+    status_description VARCHAR(50) NULL
 );
 CREATE INDEX idx_id_1 ON payment_transaction(id);
 CREATE INDEX idx_customer_id_1 ON payment_transaction(customer_id);
@@ -52,7 +55,7 @@ CREATE TABLE IF NOT EXISTS log (
 );
 
 
-CREATE TABLE json_data (
-    id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL
-);
+--CREATE TABLE json_data (
+--    id SERIAL PRIMARY KEY,
+--    data JSONB NOT NULL
+--);

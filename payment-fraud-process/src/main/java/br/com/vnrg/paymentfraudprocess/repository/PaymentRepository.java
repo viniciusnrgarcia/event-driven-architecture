@@ -26,10 +26,10 @@ public class PaymentRepository {
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             var result = this.jdbcClient.sql("""
-                              INSERT INTO payment (id, amount, customer_id, transaction_id, status)
+                              INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description)
                               VALUES (
                               (SELECT nextval('payment_id_seq')),
-                              :amount, :customerId, :transactionId, :status)
+                              :amount, :customerId, :transactionId, :status, :statusDescription)
                             """
                     )
                     //.param("id", null)
@@ -37,6 +37,7 @@ public class PaymentRepository {
                     .param("customerId", payment.customerId())
                     .param("transactionId", payment.transactionId())
                     .param("status", payment.status())
+                    .param("statusDescription", payment.statusDescription())
                     .update(keyHolder, "id");
 
             return Objects.requireNonNull(keyHolder.getKey()).longValue();
@@ -61,8 +62,9 @@ public class PaymentRepository {
     @Transactional
     public int updateStatus(Payment payment, PaymentStatus status) {
         try {
-            return this.jdbcClient.sql("UPDATE payment SET status = :status WHERE id = :id and status not in(4, 6)") // enviado pagamento, pago
+            return this.jdbcClient.sql("UPDATE payment SET status = :status, status_description = :statusDescription WHERE id = :id and status not in(4, 6)") // enviado pagamento, pago
                     .param("status", status.getValue())
+                    .param("statusDescription", status.name())
                     .param("id", payment.id())
                     .update();
 

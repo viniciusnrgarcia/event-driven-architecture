@@ -25,10 +25,10 @@ public class PaymentErrorRepository {
                             """
                     )
                     .param("id", null)
-                    .param("amount", payment.amount())
-                    .param("customerId", payment.customerId())
-                    .param("transactionId", payment.transactionId())
-                    .param("status", payment.status())
+                    .param("amount", payment.getAmount())
+                    .param("customerId", payment.getCustomerId())
+                    .param("transactionId", payment.getTransactionId())
+                    .param("status", payment.getStatus())
                     .update();
 
         } catch (Exception e) {

@@ -33,11 +33,11 @@ public class PaymentRepository {
                             """
                     )
                     //.param("id", null)
-                    .param("amount", payment.amount())
-                    .param("customerId", payment.customerId())
-                    .param("transactionId", payment.transactionId())
-                    .param("status", payment.status())
-                    .param("statusDescription", payment.statusDescription())
+                    .param("amount", payment.getAmount())
+                    .param("customerId", payment.getCustomerId())
+                    .param("transactionId", payment.getTransactionId())
+                    .param("status", payment.getStatus())
+                    .param("statusDescription", payment.getStatusDescription())
                     .update(keyHolder, "id");
 
             return Objects.requireNonNull(keyHolder.getKey()).longValue();
@@ -60,13 +60,18 @@ public class PaymentRepository {
      * @return
      */
     @Transactional
-    public int updateStatus(Payment payment, PaymentStatus status) {
+    public void updateStatus(Payment payment, PaymentStatus status) {
         try {
-            return this.jdbcClient.sql("UPDATE payment SET status = :status, status_description = :statusDescription WHERE id = :id and status not in(4, 6)") // enviado pagamento, pago
-                    .param("status", status.getValue())
+            var rowsAffected = this.jdbcClient.sql("UPDATE payment SET status = :status, status_description = :statusDescription WHERE id = :id and status not in(4, 6)") // enviado pagamento, pago
+                    .param("status", status.getCode())
                     .param("statusDescription", status.name())
-                    .param("id", payment.id())
+                    .param("id", payment.getId())
                     .update();
+
+            // se evento já processado, ou com status indisponível para pagamento ignora o mesmo
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Error updating status");
+            }
 
         } catch (Exception e) {
             log.error("Error updating status: {}", e.getMessage());

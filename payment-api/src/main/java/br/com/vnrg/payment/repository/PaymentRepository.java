@@ -23,9 +23,15 @@ public class PaymentRepository {
     @Transactional
     public Long save(Payment payment) {
         try {
+
+            if (payment.getId() != null) {
+                this.save(payment, payment.getId());
+                return payment.getId();
+            }
+
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
-            var result = this.jdbcClient.sql("""
+            this.jdbcClient.sql("""
                               INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description)
                               VALUES (
                               (SELECT nextval('payment_id_seq')),
@@ -33,11 +39,11 @@ public class PaymentRepository {
                             """
                     )
                     //.param("id", null)
-                    .param("amount", payment.amount())
-                    .param("customerId", payment.customerId())
-                    .param("transactionId", payment.transactionId())
-                    .param("status", payment.status())
-                    .param("statusDescription", payment.statusDescription())
+                    .param("amount", payment.getAmount())
+                    .param("customerId", payment.getCustomerId())
+                    .param("transactionId", payment.getTransactionId())
+                    .param("status", payment.getStatus())
+                    .param("statusDescription", payment.getStatusDescription().name())
                     .update(keyHolder, "id");
 
             return Objects.requireNonNull(keyHolder.getKey()).longValue();
@@ -53,8 +59,6 @@ public class PaymentRepository {
     @Transactional
     public void save(Payment payment, long id) {
         try {
-            KeyHolder keyHolder = new GeneratedKeyHolder();
-
             var result = this.jdbcClient.sql("""
                               INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description)
                               VALUES (
@@ -62,11 +66,11 @@ public class PaymentRepository {
                             """
                     )
                     .param("id", id)
-                    .param("amount", payment.amount())
-                    .param("customerId", payment.customerId())
-                    .param("transactionId", payment.transactionId())
-                    .param("status", payment.status())
-                    .param("statusDescription", payment.statusDescription())
+                    .param("amount", payment.getAmount())
+                    .param("customerId", payment.getCustomerId())
+                    .param("transactionId", payment.getTransactionId())
+                    .param("status", payment.getStatus())
+                    .param("statusDescription", payment.getStatusDescription().name())
                     .update();
 
         } catch (Exception e) {

@@ -1,21 +1,25 @@
 package br.com.vnrg.payment.domain;
 
+import br.com.vnrg.payment.enums.PaymentStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public record Payment(Long id,
-                      BigDecimal amount,
-                      long customerId,
-                      long transactionId,
-                      Integer status,
-                      String statusDescription) {
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Payment implements Serializable {
 
-    public Payment(Long id, BigDecimal amount, long customerId, long transactionId, Integer status, String statusDescription) {
-        this.id = id;
-        this.amount = amount;
-        this.customerId = customerId;
-        this.transactionId = transactionId;
-        this.status = status;
-        this.statusDescription = statusDescription;
-    }
+    private Long id;
+    private BigDecimal amount;
+    private long customerId;
+    private long transactionId;
+    private Integer status;
+    private PaymentStatus statusDescription;
 
 }

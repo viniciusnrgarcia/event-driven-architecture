@@ -1,11 +1,12 @@
 package br.com.vnrg.paymentfraudprocess.messaging;
 
-import br.com.vnrg.paymentfraudprocess.domain.Log;
+import br.com.vnrg.paymentfraudprocess.domain.EventStore;
 import br.com.vnrg.paymentfraudprocess.domain.Payment;
 import br.com.vnrg.paymentfraudprocess.enums.PaymentStatus;
-import br.com.vnrg.paymentfraudprocess.repository.LogRepository;
+import br.com.vnrg.paymentfraudprocess.repository.EventStoreRepository;
 import br.com.vnrg.paymentfraudprocess.repository.PaymentErrorRepository;
 import br.com.vnrg.paymentfraudprocess.repository.PaymentRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,49 +23,38 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class FraudProcessConsumer {
 
-    private final PaymentProducer paymentProducer;
+    private final PaymentValidatedProducer paymentValidatedProducer;
     private final PaymentRepository paymentRepository;
     private final PaymentErrorRepository paymentErrorRepository;
-    private final LogRepository logRepository;
+    private final EventStoreRepository eventStoreRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @KafkaListener(id = "payment-fraud-process-id",
-            topics = "payment-fraud-process", groupId = "payment-fraud-process-group", concurrency = "${listen.concurrency:1}",
+            topics = "payment-created", groupId = "payment-fraud-process-group", concurrency = "${listen.concurrency:1}",
             autoStartup = "${listen.auto.start:true}"
     )
-    public void listen(String message, Acknowledgment ack, @Headers Map<String, Object> headers) {
+    public void listen(String message, Acknowledgment ack, @Headers Map<String, Object> headers) throws JsonProcessingException {
+        Payment payment = null;
         try {
-            var payment = this.mapper.readValue(message, Payment.class);
+            payment = this.mapper.readValue(message, Payment.class);
             var messageKey = (String) headers.get(KafkaHeaders.KEY);
-            this.logRepository.save(new Log(payment.id(), "payment-fraud-process", mapper.writeValueAsString(payment)));
+            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-fraud-process", mapper.writeValueAsString(payment)));
 
             log.info("Consumed message key: {} message content: {} ", messageKey, message);
 
             // Atualiza para em processamento
             // exactly once commit
-            var rowsAffected = this.paymentRepository.updateStatus(payment, PaymentStatus.FRAUD_PROCESSING);
+            this.paymentRepository.updateStatus(payment, PaymentStatus.FRAUD_PROCESSING);
+            // processamento do evento e controle de status
+            this.fraudAnalysis(payment);
 
-            if (rowsAffected == 1) {
-                var paymentFraudProcessing = new Payment(payment.id(), payment.amount(), payment.customerId(), payment.transactionId(), PaymentStatus.FRAUD_PROCESSING.getValue());
-                this.logRepository.save(new Log(payment.id(), "payment-fraud-process", mapper.writeValueAsString(paymentFraudProcessing)));
-
-                // processamento do evento e controle de status
-                this.fraudAnalysis(paymentFraudProcessing);
-
-                // se não identificado fraude, envia pagamento
-                var paymentFraudProcessCompleted = new Payment(payment.id(), payment.amount(), payment.customerId(), payment.transactionId(), PaymentStatus.FRAUD_PROCESS_COMPLETED.getValue());
-                this.paymentProducer.sendMessage(payment.id(), mapper.writeValueAsString(paymentFraudProcessCompleted));
-
-            } else {
-                // se evento já processado, ou com status indisponível para pagamento ignora o mesmo
-                log.error("Transaction ID: {}, Status: {}", payment.transactionId(), payment.status());
-                this.paymentErrorRepository.save(payment);
-                this.logRepository.save(new Log(payment.id(), "payment-fraud-process", mapper.writeValueAsString(payment)));
-            }
 
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
-            throw new RuntimeException(e);
+            this.paymentErrorRepository.save(payment);
+            if (payment != null) {
+                this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-fraud-process", mapper.writeValueAsString(payment)));
+            }
 
         } finally {
             ack.acknowledge();
@@ -76,11 +66,27 @@ public class FraudProcessConsumer {
             // TODO fraud analysis
             // business rules
             // Atualiza para pagamento enviado
+            var paymentFraudProcessing = new Payment(payment.getId(), payment.getAmount(), payment.getCustomerId(), payment.getTransactionId(), PaymentStatus.FRAUD_PROCESSING.getCode(), PaymentStatus.FRAUD_PROCESSING);
+            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-fraud-process", mapper.writeValueAsString(paymentFraudProcessing)));
+
             this.paymentRepository.updateStatus(payment, PaymentStatus.FRAUD_PROCESS_COMPLETED);
 
-            var paymentSend = new Payment(payment.id(), payment.amount(), payment.customerId(), payment.transactionId(), PaymentStatus.FRAUD_PROCESS_COMPLETED.getValue());
-            this.logRepository.save(new Log(payment.id(), "payment-fraud-process", mapper.writeValueAsString(paymentSend)));
-            log.info("Transaction ID: {}, Status: {}", payment.transactionId(), payment.status());
+            var paymentSend = new Payment(payment.getId(),
+                    payment.getAmount(),
+                    payment.getCustomerId(),
+                    payment.getTransactionId(),
+                    PaymentStatus.FRAUD_PROCESS_COMPLETED.getCode(),
+                    PaymentStatus.FRAUD_PROCESS_COMPLETED);
+
+            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-fraud-process", mapper.writeValueAsString(paymentSend)));
+
+            // se não identificado fraude, envia pagamento
+            var paymentFraudProcessCompleted = new Payment(payment.getId(), payment.getAmount(), payment.getCustomerId(),
+                    payment.getTransactionId(), PaymentStatus.FRAUD_PROCESS_COMPLETED.getCode(),
+                    PaymentStatus.FRAUD_PROCESS_COMPLETED);
+            this.paymentValidatedProducer.sendMessage(payment.getId(), mapper.writeValueAsString(paymentFraudProcessCompleted));
+
+            log.info("Fraud analysis ID: {}, Status: {}", payment.getTransactionId(), payment.getStatus());
 
         } catch (Exception e) {
             log.error("Error send Payment: {}", e.getMessage());

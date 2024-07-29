@@ -1,17 +1,14 @@
 package br.com.vnrg.payment.api;
 
-import br.com.vnrg.payment.domain.Log;
 import br.com.vnrg.payment.domain.Payment;
 import br.com.vnrg.payment.enums.PaymentStatus;
-import br.com.vnrg.payment.messaging.FraudProcessProducer;
-import br.com.vnrg.payment.repository.LogRepository;
+import br.com.vnrg.payment.messaging.PaymentCreatedProducer;
 import br.com.vnrg.payment.repository.PaymentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,61 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class PaymentController {
 
-    private final FraudProcessProducer fraudProcessProducer;
+    private final PaymentCreatedProducer paymentCreatedProducer;
     private final ObjectMapper mapper = new ObjectMapper();
     private final PaymentRepository paymentRepository;
-    private final LogRepository logRepository;
 
     @PostMapping(path = "/payment")
-    public ResponseEntity<Void> createPayment(@RequestBody Payment payment) throws JsonProcessingException {
+    public ResponseEntity<Void> createPayment(@RequestBody PaymentRequest paymentRequest) throws JsonProcessingException {
         try {
-            var id = this.paymentRepository.save(payment);
-            var paymentCreated = new Payment(id, payment.amount(), payment.customerId(), payment.transactionId(), payment.status(),
-                    PaymentStatus.fromValue(payment.status()).name());
-            this.logRepository.save(new Log(id, "payment-api", mapper.writeValueAsString(paymentCreated)));
-            var json = mapper.writeValueAsString(paymentCreated);
-            this.fraudProcessProducer.sendMessage(id, json);
-            log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
+            var paymentCreated = this.savePayment(paymentRequest);
+            this.sendMessage(paymentCreated);
 
         } catch (Exception e) {
-            log.error("Transaction ID: {}, Error: {}", payment.transactionId(), e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-        return ResponseEntity.ok().build();
-
-    }
-
-    @PostMapping(path = "/manual-payment")
-    public ResponseEntity<Void> createManualPayment(@RequestBody Payment payment) throws JsonProcessingException {
-        try {
-            var json = mapper.writeValueAsString(payment);
-            this.logRepository.save(new Log(payment.id(), "payment-api", mapper.writeValueAsString(payment)));
-            this.fraudProcessProducer.sendMessage(payment.id(), json);
-            log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
-
-        } catch (Exception e) {
-            log.error("Transaction ID: {}, Error: {}", payment.transactionId(), e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-        return ResponseEntity.ok().build();
-
-    }
-
-
-    @PostMapping(path = "/payment/{events}")
-    public ResponseEntity<Void> createPayment(@RequestBody Payment payment, @PathVariable Integer events) {
-        try {
-            for (int i = 0; i < events; i++) {
-                var id = this.paymentRepository.save(payment);
-                this.logRepository.save(new Log(id, "payment-api", mapper.writeValueAsString(payment)));
-                var paymentCreated = new Payment(id, payment.amount(), payment.customerId(), payment.transactionId(), payment.status(), payment.statusDescription());
-                var json = mapper.writeValueAsString(paymentCreated);
-                this.fraudProcessProducer.sendMessage(id, json);
-                log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
-            }
-
-        } catch (Exception e) {
-            log.error("Transaction ID: {}, Error: {}", payment.transactionId(), e.getMessage());
+            log.error("Transaction ID: {}, Error: {}", paymentRequest.transactionId(), e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
         return ResponseEntity.ok().build();
@@ -84,30 +38,49 @@ public class PaymentController {
 
     /**
      * API para injestão de eventos para teste de integridade
-     * @param payment
-     * @return
+     *
+     * @param paymentRequest PaymentRequest
+     * @return ResponseEntity Void - 200
      */
     @PostMapping(path = "/payment-id")
-    public ResponseEntity<Void> createPaymentId(@RequestBody Payment payment) {
-
+    public ResponseEntity<Void> createPaymentId(@RequestBody PaymentRequest paymentRequest) {
+        var paymentCreated = this.savePayment(paymentRequest);
         try {
-            this.paymentRepository.save(payment, payment.id());
+            this.savePayment(paymentRequest);
         } catch (Exception e) {
-            log.error("Transaction ID: {}, Error: {}", payment.transactionId(), e.getMessage());
+            log.error("Transaction created with ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
             // ignore exception to duplicate events in topic
         }
 
         try {
-            var json = mapper.writeValueAsString(payment);
-            this.logRepository.save(new Log(payment.id(), "payment-api", mapper.writeValueAsString(payment)));
-            this.fraudProcessProducer.sendMessage(payment.id(), json);
-            log.info("Transaction ID: {}, Message: {}", payment.transactionId(), json);
+            this.sendMessage(paymentCreated);
 
         } catch (Exception e) {
-            log.error("Transaction ID: {}, Error: {}", payment.transactionId(), e.getMessage());
+            log.error("Transaction error ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
         return ResponseEntity.ok().build();
 
     }
+
+    private void sendMessage(Payment paymentCreated) throws JsonProcessingException {
+        var json = mapper.writeValueAsString(paymentCreated);
+        this.paymentCreatedProducer.sendMessage(paymentCreated.getId(), json);
+        log.info("Send Message  ID: {}, Message: {}", paymentCreated.getTransactionId(), json);
+    }
+
+
+    private Payment savePayment(PaymentRequest paymentRequest) {
+        var payment = new Payment(paymentRequest.id(),
+                paymentRequest.amount(),
+                paymentRequest.customerId(),
+                paymentRequest.transactionId(),
+                PaymentStatus.ofNullableFromValue(paymentRequest.status()).getCode(),
+                PaymentStatus.ofNullableFromValue(paymentRequest.status()));
+
+        var id = this.paymentRepository.save(payment);
+        payment.setId(id);
+        return payment;
+    }
+
 }

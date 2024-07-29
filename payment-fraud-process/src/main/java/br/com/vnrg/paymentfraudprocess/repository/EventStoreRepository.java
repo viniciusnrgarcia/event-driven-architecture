@@ -1,6 +1,6 @@
-package br.com.vnrg.paymentsend.repository;
+package br.com.vnrg.paymentfraudprocess.repository;
 
-import br.com.vnrg.paymentsend.domain.Log;
+import br.com.vnrg.paymentfraudprocess.domain.EventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,12 +14,12 @@ import java.sql.PreparedStatement;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class LogRepository {
+public class EventStoreRepository {
 
     private final JdbcClient jdbcClient;
 
     @Transactional
-    public void save(Log data) {
+    public void save(EventStore data) {
         try {
             String sql = "INSERT INTO log (id, json) VALUES (?, ?::jsonb)";
 
@@ -28,7 +28,7 @@ public class LogRepository {
             param.addValue("createdBy", data.createdBy());
             param.addValue("json", data.json());
 
-            jdbcClient.sql("INSERT INTO log (id, created_by, json) VALUES (:id, :createdBy, :json::jsonb)")
+            jdbcClient.sql("INSERT INTO event_store (id, created_by, json) VALUES (:id, :createdBy, :json::jsonb)")
                     .paramSource(param)
                     .update();
 

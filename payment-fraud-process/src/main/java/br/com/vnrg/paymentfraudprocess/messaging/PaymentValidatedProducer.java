@@ -1,5 +1,7 @@
-package br.com.vnrg.payment.messaging;
+package br.com.vnrg.paymentfraudprocess.messaging;
 
+import br.com.vnrg.paymentfraudprocess.domain.EventStore;
+import br.com.vnrg.paymentfraudprocess.repository.EventStoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -11,18 +13,22 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class FraudProcessProducer {
+public class PaymentValidatedProducer {
 
     private final KafkaTemplate<Long, String> kafkaTemplate;
+    private final EventStoreRepository eventStoreRepository;
 
     public void sendMessage(Long key, String message) {
         try {
-            CompletableFuture<SendResult<Long, String>> future = kafkaTemplate.send("payment-fraud-process", key, message);
+            this.eventStoreRepository.save(new EventStore(key, "payment-fraud-process", message));
+
+            CompletableFuture<SendResult<Long, String>> future = kafkaTemplate.send("payment-validated", key, message);
             future.whenComplete((result, ex) -> {
                 if (ex == null) {
                     log.info("sent message='{}' with offset={}", message, result.getRecordMetadata().offset());
                 } else {
                     log.error("failed to send message='{}'", message, ex);
+                    // TODO send to retry topic (error)
                 }
             });
         } catch (Exception e) {

@@ -1,8 +1,9 @@
-package br.com.vnrg.paymenteventdomain.enums;
+package br.com.vnrg.payment.enums;
 
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 @Getter
 public enum PaymentStatus implements Serializable {
@@ -28,5 +29,9 @@ public enum PaymentStatus implements Serializable {
             }
         }
         return null;
+    }
+
+    public static PaymentStatus ofNullableFromValue(int value) {
+        return Optional.ofNullable(fromValue(value)).orElse(NEW);
     }
 }

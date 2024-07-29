@@ -21,6 +21,8 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConsumerConfig {
 
+    // TODO configure properties + handle errors + retries + backoff
+
     @Value("${environment.kafka.bootstrap-servers}")
     private String bootstrapServers;
 

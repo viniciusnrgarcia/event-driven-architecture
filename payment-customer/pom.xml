@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>br.com.vnrg</groupId>
-	<artifactId>payment-api</artifactId>
+	<artifactId>payment-customer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>payment-api</name>
+	<name>payment-customer</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -28,7 +28,10 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<spring-cloud.version>2023.0.3</spring-cloud.version>
+		<spring-statemachine.version>4.0.0</spring-statemachine.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -67,7 +70,6 @@
 			<artifactId>HikariCP</artifactId>
 			<version>5.1.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -109,13 +111,11 @@
 			<scope>test</scope>
 		</dependency>-->
 
+		<!-- State machina -->
 		<dependency>
-			<groupId>br.com.vnrg</groupId>
-			<artifactId>payment-event-domain</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>org.springframework.statemachine</groupId>
+			<artifactId>spring-statemachine-starter</artifactId>
 		</dependency>
-
-
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -123,6 +123,13 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>
 				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.statemachine</groupId>
+				<artifactId>spring-statemachine-bom</artifactId>
+				<version>${spring-statemachine.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

@@ -1,4 +1,4 @@
-package br.com.vnrg.payment.config;
+package br.com.vnrg.paymentfraudprocess.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongSerializer;
@@ -26,12 +26,12 @@ public class KafkaProducerConfig {
 
     @Bean
     public Map<String, Object> producerConfigs() {
-        Map<String, Object> configMap = new HashMap<>();
-        configMap.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
-        configMap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
-        configMap.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         // See https://kafka.apache.org/documentation/#producerconfigs for more properties
-        return configMap;
+        return props;
     }
 
     @Bean

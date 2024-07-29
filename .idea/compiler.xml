@@ -7,15 +7,28 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="payment-customer" />
         <module name="payment-fraud-process" />
         <module name="payment-api" />
         <module name="payment-send" />
+      </profile>
+      <profile name="Annotation profile for payment-event-domain" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.34/lombok-1.18.34.jar" />
+        </processorPath>
+        <module name="payment-event-domain" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="payment-api" options="-parameters" />
+      <module name="payment-customer" options="-parameters" />
+      <module name="payment-event-domain" options="-parameters" />
       <module name="payment-fraud-process" options="-parameters" />
       <module name="payment-send" options="-parameters" />
     </option>

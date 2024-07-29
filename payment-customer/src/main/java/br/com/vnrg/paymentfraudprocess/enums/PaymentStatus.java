@@ -1,4 +1,4 @@
-package br.com.vnrg.payment.enums;
+package br.com.vnrg.paymentfraudprocess.enums;
 
 public enum PaymentStatus {
 
@@ -18,14 +18,5 @@ public enum PaymentStatus {
 
     public int getValue() {
         return value;
-    }
-
-    public static PaymentStatus fromValue(int value) {
-        for (PaymentStatus status : PaymentStatus.values()) {
-            if (status.getValue() == value) {
-                return status;
-            }
-        }
-        return null;
     }
 }

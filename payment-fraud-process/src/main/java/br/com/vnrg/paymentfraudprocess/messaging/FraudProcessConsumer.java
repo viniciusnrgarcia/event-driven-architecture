@@ -37,7 +37,7 @@ public class FraudProcessConsumer {
         Payment payment = null;
         try {
             payment = this.mapper.readValue(message, Payment.class);
-            var messageKey = (String) headers.get(KafkaHeaders.KEY);
+            var messageKey = (String) headers.get(KafkaHeaders.RECEIVED_KEY);
             this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-fraud-process", mapper.writeValueAsString(payment)));
 
             log.info("Consumed message key: {} message content: {} ", messageKey, message);

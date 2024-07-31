@@ -44,13 +44,20 @@ public class PaymentController {
      */
     @PostMapping(path = "/payment-id")
     public ResponseEntity<Void> createPaymentId(@RequestBody PaymentRequest paymentRequest) {
-        var paymentCreated = this.savePayment(paymentRequest);
-        try {
-            this.savePayment(paymentRequest);
-        } catch (Exception e) {
-            log.error("Transaction created with ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
-            // ignore exception to duplicate events in topic
-        }
+        var id = this.paymentRepository.getPaymentId();
+        var paymentCreated = new Payment(
+                id,
+                paymentRequest.amount(),
+                paymentRequest.customerId(),
+                paymentRequest.transactionId(),
+                PaymentStatus.ofNullableFromValue(paymentRequest.status()).getCode(),
+                PaymentStatus.ofNullableFromValue(paymentRequest.status()));
+//        try {
+//            this.savePayment(paymentRequest);
+//        } catch (Exception e) {
+//            log.error("Transaction created with ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
+//            // ignore exception to duplicate events in topic
+//        }
 
         try {
             this.sendMessage(paymentCreated);

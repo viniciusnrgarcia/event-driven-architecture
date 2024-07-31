@@ -58,6 +58,8 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "1");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         // See https://kafka.apache.org/documentation/#consumerconfigs for more properties
         return props;

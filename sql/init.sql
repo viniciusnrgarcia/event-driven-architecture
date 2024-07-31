@@ -47,7 +47,7 @@ CREATE INDEX idx_customer_id_1 ON payment_transaction(customer_id);
 -- id SERIAL PRIMARY KEY,
 
 
-CREATE TABLE IF NOT EXISTS log (
+CREATE TABLE IF NOT EXISTS event_store (
     id INTEGER NULL,
     created_at timestamp with time zone default current_timestamp,
     created_by varchar(100) null,

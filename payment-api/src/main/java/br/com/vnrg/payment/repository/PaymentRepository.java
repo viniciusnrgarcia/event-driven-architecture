@@ -21,6 +21,17 @@ public class PaymentRepository {
     }
 
     @Transactional
+    public Long getPaymentId() {
+        try {
+            return this.jdbcClient.sql("SELECT nextval('payment_id_seq')").query(Long.class).single();
+        } catch (Exception e) {
+            log.error("Error: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    @Transactional
     public Long save(Payment payment) {
         try {
 

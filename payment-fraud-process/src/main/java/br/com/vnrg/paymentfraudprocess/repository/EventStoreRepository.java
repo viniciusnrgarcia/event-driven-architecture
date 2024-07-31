@@ -21,7 +21,7 @@ public class EventStoreRepository {
     @Transactional
     public void save(EventStore data) {
         try {
-            String sql = "INSERT INTO log (id, json) VALUES (?, ?::jsonb)";
+            // String sql = "INSERT INTO event_store (id, json) VALUES (?, ?::jsonb)";
 
             MapSqlParameterSource param = new MapSqlParameterSource();
             param.addValue("id", data.id());

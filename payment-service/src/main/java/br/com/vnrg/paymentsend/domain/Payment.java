@@ -1,6 +1,6 @@
-package br.com.vnrg.paymentsend.domain;
+package br.com.vnrg.paymentservice.domain;
 
-import br.com.vnrg.paymentsend.enums.PaymentStatus;
+import br.com.vnrg.paymentservice.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

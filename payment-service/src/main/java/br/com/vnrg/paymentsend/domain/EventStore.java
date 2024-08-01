@@ -1,4 +1,4 @@
-package br.com.vnrg.paymentsend.domain;
+package br.com.vnrg.paymentservice.domain;
 
 public record EventStore(Long id,
                          String createdBy,

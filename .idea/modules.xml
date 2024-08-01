@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/event-driven-architecture.iml" filepath="$PROJECT_DIR$/.idea/event-driven-architecture.iml" />
+      <module fileurl="file://$PROJECT_DIR$/payment-event-domain/payment-event-domain.iml" filepath="$PROJECT_DIR$/payment-event-domain/payment-event-domain.iml" />
     </modules>
   </component>
 </project>

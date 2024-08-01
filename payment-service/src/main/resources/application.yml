@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: payment-send
+    name: payment-service
 #  kafka:
 #    bootstrap-servers: "127.0.0.1:9092"
     # Configuration for consumer

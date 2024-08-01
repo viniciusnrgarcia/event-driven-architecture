@@ -1,6 +1,6 @@
-package br.com.vnrg.paymentsend.repository;
+package br.com.vnrg.paymentservice.repository;
 
-import br.com.vnrg.paymentsend.domain.EventStore;
+import br.com.vnrg.paymentservice.domain.EventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;

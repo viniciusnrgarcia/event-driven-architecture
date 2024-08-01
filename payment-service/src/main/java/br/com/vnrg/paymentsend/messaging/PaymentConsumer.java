@@ -1,11 +1,11 @@
-package br.com.vnrg.paymentsend.messaging;
+package br.com.vnrg.paymentservice.messaging;
 
-import br.com.vnrg.paymentsend.domain.EventStore;
-import br.com.vnrg.paymentsend.domain.Payment;
-import br.com.vnrg.paymentsend.enums.PaymentStatus;
-import br.com.vnrg.paymentsend.repository.EventStoreRepository;
-import br.com.vnrg.paymentsend.repository.PaymentErrorRepository;
-import br.com.vnrg.paymentsend.repository.PaymentRepository;
+import br.com.vnrg.paymentservice.domain.EventStore;
+import br.com.vnrg.paymentservice.domain.Payment;
+import br.com.vnrg.paymentservice.enums.PaymentStatus;
+import br.com.vnrg.paymentservice.repository.EventStoreRepository;
+import br.com.vnrg.paymentservice.repository.PaymentErrorRepository;
+import br.com.vnrg.paymentservice.repository.PaymentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,8 @@ public class PaymentConsumer {
     private final EventStoreRepository eventStoreRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @KafkaListener(id = "payment-send-id",
-            topics = "payment-validated", groupId = "payment-send-group", concurrency = "${listen.concurrency:1}",
+    @KafkaListener(id = "payment-service-id",
+            topics = "payment-validated", groupId = "payment-service-group", concurrency = "${listen.concurrency:1}",
             autoStartup = "${listen.auto.start:true}"
             // errorHandler = "validationErrorHandler"
     )
@@ -39,7 +39,7 @@ public class PaymentConsumer {
         try {
             payment = this.mapper.readValue(message, Payment.class);
             var messageKey = (String) headers.get(KafkaHeaders.KEY);
-            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-send", mapper.writeValueAsString(payment)));
+            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service", mapper.writeValueAsString(payment)));
 
             log.info("Consumed message key: {} message content: {} ", messageKey, message);
 
@@ -57,7 +57,7 @@ public class PaymentConsumer {
                 // se evento já processado, ou com status indisponível para pagamento ignora o mesmo
                 log.error("Transaction ID: {}, Status: {}", payment.getTransactionId(), payment.getStatus());
                 this.paymentErrorRepository.save(payment);
-                this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-send",
+                this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service",
                         mapper.writeValueAsString(payment)));
             }
 
@@ -82,7 +82,7 @@ public class PaymentConsumer {
 
             var paymentSend = new Payment(payment.getId(), payment.getAmount(), payment.getCustomerId(),
                     payment.getTransactionId(), PaymentStatus.SENT.getCode(), PaymentStatus.SENT);
-            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-send", mapper.writeValueAsString(paymentSend)));
+            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service", mapper.writeValueAsString(paymentSend)));
             log.info("Transaction ID: {}, Status: {}", payment.getTransactionId(), payment.getStatus());
 
         } catch (Exception e) {

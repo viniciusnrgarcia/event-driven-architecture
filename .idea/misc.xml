@@ -6,15 +6,12 @@
       <list>
         <option value="$PROJECT_DIR$/payment-producer/pom.xml" />
         <option value="$PROJECT_DIR$/payment-api/pom.xml" />
-        <option value="$PROJECT_DIR$/payment-fraud-process/pom.xml" />
         <option value="$PROJECT_DIR$/payment-send/pom.xml" />
+        <option value="$PROJECT_DIR$/payment-fraud-process/pom.xml" />
         <option value="$PROJECT_DIR$/payment-event-domain/pom.xml" />
+        <option value="$PROJECT_DIR$/payment-customer/pom.xml" />
+        <option value="$PROJECT_DIR$/payment-service/pom.xml" />
       </list>
-    </option>
-    <option name="ignoredFiles">
-      <set>
-        <option value="$PROJECT_DIR$/payment-event-domain/pom.xml" />
-      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK">

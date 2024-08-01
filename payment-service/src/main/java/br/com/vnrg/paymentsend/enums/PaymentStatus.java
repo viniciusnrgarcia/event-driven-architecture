@@ -1,4 +1,4 @@
-package br.com.vnrg.paymentsend.enums;
+package br.com.vnrg.paymentservice.enums;
 
 import lombok.Getter;
 

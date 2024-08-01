@@ -1,7 +1,7 @@
-package br.com.vnrg.paymentsend.repository;
+package br.com.vnrg.paymentservice.repository;
 
-import br.com.vnrg.paymentsend.domain.Payment;
-import br.com.vnrg.paymentsend.enums.PaymentStatus;
+import br.com.vnrg.paymentservice.domain.Payment;
+import br.com.vnrg.paymentservice.enums.PaymentStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.jdbc.support.GeneratedKeyHolder;

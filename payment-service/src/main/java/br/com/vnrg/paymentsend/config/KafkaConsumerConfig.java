@@ -1,4 +1,4 @@
-package br.com.vnrg.paymentsend.config;
+package br.com.vnrg.paymentservice.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;

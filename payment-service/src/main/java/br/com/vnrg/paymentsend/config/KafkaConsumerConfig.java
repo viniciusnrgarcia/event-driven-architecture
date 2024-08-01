@@ -59,9 +59,20 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
-        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "1");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        // See https://kafka.apache.org/documentation/#consumerconfigs for more properties
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "300000"); //  determina o intervalo limite que o consumer irá ficar processando as mensagens do último poll(). Se o consumer não realizar uma outra chamada dentro desse tempo, o coordinator vai considerar o consumer em falha e vai provocar um rebalance. Se sua aplicação demora muito tempo para processar os eventos você pode aumentar esse parâmetro para esperar mais tempo e conseguir processar os eventos no tempo adequado. Só tenha em mente que se aumentar muito esse valor pode fazer com que o coordinator demore mais para descobrir que sua aplicação falhou.
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1"); // O numero máximo de eventos retornado em uma simples chamada de poll(). O valor default é 500.
+
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "300000"); // specifica o máximo de tempo em milissegundos que um consumer dentro de um consumer group pode ficar sem enviar heartbeat antes de ser considerado inativo e provocar um rebalance.
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "120000"); // 2min
+
+        /**
+         * Se você aumentar o fetch.min.bytes, por exemplo, com um valor maior que o padrão o consumer vai realizar
+         * menos requests para o broker e irá trazer mais dados em um único batch, consequentemente irá reduzir a
+         * sobrecarga de CPU no consumer e no broker.
+         */
+        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "60000");
+        props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, "1");
         return props;
     }
 

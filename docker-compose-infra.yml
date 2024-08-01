@@ -155,3 +155,40 @@ services:
     command:
       - start-dev
 
+#  prometheus:
+#    image: prom/prometheus:latest
+#    volumes:
+#      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+#    ports:
+#      - "9090:9090"
+#  #    command: --config.file=/run/secrets/prometheus.yml --storage.tsdb.path=/prometheus --storage.tsdb.retention=168h
+#
+#  grafana:
+#    image: grafana/grafana:latest
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
+#
+#  kafka_exporter:
+#    image: danielqsj/kafka-exporter:latest
+#    ports:
+#      - "9308:9308"
+##    command: ["--kafka.server=kafka:9092"]
+#    environment:
+#      - KAFKA_URI=localhost:9092
+#      - KAFKA_VERSION=2.0.0.0
+#      - KAFKA_EXPORTER_LOG_LEVEL=info
+#    depends_on:
+#      - kafka
+
+
+#  kafka_exporter:
+#    image: danielqsj/kafka-exporter
+#    command: --kafka.server=kafka:9092
+#    depends_on:
+#      - kafka
+
+
+
+

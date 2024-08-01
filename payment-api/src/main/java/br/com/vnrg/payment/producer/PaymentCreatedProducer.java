@@ -1,4 +1,4 @@
-package br.com.vnrg.payment.messaging;
+package br.com.vnrg.payment.producer;
 
 import br.com.vnrg.payment.domain.EventStore;
 import br.com.vnrg.payment.repository.EventStoreRepository;

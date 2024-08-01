@@ -2,7 +2,7 @@ package br.com.vnrg.payment.api;
 
 import br.com.vnrg.payment.domain.Payment;
 import br.com.vnrg.payment.enums.PaymentStatus;
-import br.com.vnrg.payment.messaging.PaymentCreatedProducer;
+import br.com.vnrg.payment.producer.PaymentCreatedProducer;
 import br.com.vnrg.payment.repository.PaymentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,20 +44,20 @@ public class PaymentController {
      */
     @PostMapping(path = "/payment-id")
     public ResponseEntity<Void> createPaymentId(@RequestBody PaymentRequest paymentRequest) {
-        var id = this.paymentRepository.getPaymentId();
+        // var id = this.paymentRepository.getPaymentId();
         var paymentCreated = new Payment(
-                id,
+                paymentRequest.id(),
                 paymentRequest.amount(),
                 paymentRequest.customerId(),
                 paymentRequest.transactionId(),
                 PaymentStatus.ofNullableFromValue(paymentRequest.status()).getCode(),
                 PaymentStatus.ofNullableFromValue(paymentRequest.status()));
-//        try {
-//            this.savePayment(paymentRequest);
-//        } catch (Exception e) {
-//            log.error("Transaction created with ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
-//            // ignore exception to duplicate events in topic
-//        }
+        try {
+            this.savePayment(paymentRequest);
+        } catch (Exception e) {
+            log.error("Error ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
+            // ignore exception to duplicate events in topic
+        }
 
         try {
             this.sendMessage(paymentCreated);

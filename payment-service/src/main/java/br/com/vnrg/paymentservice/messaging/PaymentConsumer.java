@@ -38,7 +38,7 @@ public class PaymentConsumer {
         Payment payment = null;
         try {
             payment = this.mapper.readValue(message, Payment.class);
-            var messageKey = (String) headers.get(KafkaHeaders.KEY);
+            var messageKey = headers.get(KafkaHeaders.KEY);
             this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service", mapper.writeValueAsString(payment)));
 
             log.info("Consumed message key: {} message content: {} ", messageKey, message);
@@ -69,6 +69,7 @@ public class PaymentConsumer {
     private void sendPayment(Payment payment) {
         try {
             // TODO send payment
+            Thread.sleep(500); // API external
             // business rules API External
 
             // teste error

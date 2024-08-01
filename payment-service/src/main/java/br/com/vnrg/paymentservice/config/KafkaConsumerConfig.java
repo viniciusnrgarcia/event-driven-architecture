@@ -33,9 +33,9 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
-        // factory.setConcurrency(1);
-        factory.getContainerProperties().setPollTimeout(3000);
-        // factory.setCommonErrorHandler(errorHandler());
+        factory.getContainerProperties().setIdleBetweenPolls(1); // The sleep interval in milliseconds used in the main loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
+        factory.setConcurrency(1);
+//        factory.setCommonErrorHandler(errorHandler()); todo: handle errors
         return factory;
     }
 
@@ -64,7 +64,9 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1"); // O numero máximo de eventos retornado em uma simples chamada de poll(). O valor default é 500.
 
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "300000"); // specifica o máximo de tempo em milissegundos que um consumer dentro de um consumer group pode ficar sem enviar heartbeat antes de ser considerado inativo e provocar um rebalance.
-        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "120000"); // 2min
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "60000");
+
+        props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "300000");
 
         /**
          * Se você aumentar o fetch.min.bytes, por exemplo, com um valor maior que o padrão o consumer vai realizar
@@ -75,17 +77,4 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, "1");
         return props;
     }
-
-
-    /*
-     * batch consumer
-     @Bean
-     public KafkaListenerContainerFactory<?> batchFactory() {
-         ConcurrentKafkaListenerContainerFactory<Long, String> factory =
-         new ConcurrentKafkaListenerContainerFactory<>();
-         factory.setConsumerFactory(consumerFactory());
-         factory.setBatchListener(true);  // <<<<<<<<<<<<<<<<<<<<<<<<<
-        return factory;
-     }
-     */
 }

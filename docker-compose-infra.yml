@@ -8,8 +8,8 @@ services:
     image: docker.io/bitnami/zookeeper:3.8
     ports:
       - "2181:2181"
-#    volumes:
-#      - "zookeeper-volume:/bitnami"
+    #    volumes:
+    #      - "zookeeper-volume:/bitnami"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
@@ -19,8 +19,8 @@ services:
     image: docker.io/bitnami/kafka:3.3
     ports:
       - "29092:29092"
-#    volumes:
-#      - "kafka-volume:/bitnami"
+    #    volumes:
+    #      - "kafka-volume:/bitnami"
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
@@ -31,33 +31,33 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
     depends_on:
       - zookeeper
-#  zookeeper:
-#    image: confluentinc/cp-zookeeper:latest
-#    hostname: zookeeper
-#    environment:
-#      ZOOKEEPER_CLIENT_PORT: 2181
-#      ZOOKEEPER_TICK_TIME: 2000
-#    ports:
-#      - "2181:2181"
-#
-#  kafka:
-#    image: confluentinc/cp-kafka:latest
-#    hostname: kafka
-#    depends_on:
-#      - zookeeper
-#    ports:
-#      - "9092:9092"
-#      - "29092:29092"
-#    environment:
-#      KAFKA_BROKER_ID: 1
-#      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
-#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_INTERNAL://kafka:9092
-#      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-#      KAFKA_INTER__BROKER_LISTENER_NAME: PLAINTEXT
-#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-#      # KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-#      # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #  zookeeper:
+  #    image: confluentinc/cp-zookeeper:latest
+  #    hostname: zookeeper
+  #    environment:
+  #      ZOOKEEPER_CLIENT_PORT: 2181
+  #      ZOOKEEPER_TICK_TIME: 2000
+  #    ports:
+  #      - "2181:2181"
+  #
+  #  kafka:
+  #    image: confluentinc/cp-kafka:latest
+  #    hostname: kafka
+  #    depends_on:
+  #      - zookeeper
+  #    ports:
+  #      - "9092:9092"
+  #      - "29092:29092"
+  #    environment:
+  #      KAFKA_BROKER_ID: 1
+  #      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+  #      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+  #      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_INTERNAL://kafka:9092
+  #      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+  #      KAFKA_INTER__BROKER_LISTENER_NAME: PLAINTEXT
+  #      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #      # KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #      # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
@@ -97,9 +97,9 @@ services:
     hostname: nginx
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#    depends_on:
-#      - api01
-#      - api02
+    #    depends_on:
+    #      - api01
+    #      - api02
     ports:
       # Obrigatório expor/usar a porta 9999 no load balancer!
       - "9999:9999"

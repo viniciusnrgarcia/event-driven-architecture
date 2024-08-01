@@ -32,7 +32,7 @@ public class KafkaConsumerConfig {
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         // factory.setConcurrency(1);
-        factory.getContainerProperties().setPollTimeout(3000);
+        // factory.getContainerProperties().setPollTimeout(3000);
         // factory.setCommonErrorHandler(errorHandler());
         return factory;
     }

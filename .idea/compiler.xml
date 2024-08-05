@@ -11,6 +11,7 @@
         <module name="payment-service" />
         <module name="payment-fraud-process" />
         <module name="payment-api" />
+        <module name="payment-connector-mq" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -21,6 +22,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="payment-api" options="-parameters" />
+      <module name="payment-connector-mq" options="-parameters" />
       <module name="payment-customer" options="-parameters" />
       <module name="payment-event-domain" options="-parameters" />
       <module name="payment-fraud-process" options="-parameters" />

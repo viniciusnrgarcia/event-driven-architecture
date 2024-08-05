@@ -10,9 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorConsumer {
 
-    @JmsListener(destination = "${ibm.mq.payment-connector.queue.mq}",
-            concurrency = "${ibm.mq.payment-connector.queue.concurrency}"
-            // containerFactory = "jmsListenerContainerFactory"
+    @JmsListener(destination = "${ibm.mq.queue.payment.mq}",
+            concurrency = "${ibm.mq.queue.payment.concurrency}"
     )
     public void receiveMessage(String message) {
         try {

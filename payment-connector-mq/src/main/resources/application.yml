@@ -89,24 +89,22 @@ logging:
 ibm:
   mq:
     queueManager: QM1
-    # channel: DEV.ADMIN.SVRCONN # SYSTEM.DEF.SVRCONN
-#     channel: DEV.ADMIN.SVRCONN
     channel: DEV.ADMIN.SVRCONN
     connName: 127.0.0.1(1414)
-    username: admin
+    user: admin
     password: passw0rd
     #host: localhost
     #port: 1414
     #transportType: 1
     #use-i-b-m-cipher-mappings: false
-    poll:
-      enabled: true
-      max-connections: 1
-    payment-connector:
-      queue:
-        concurrency: 10
-        mq: DEV.QUEUE.1
-        dlq: DEV.QUEUE.2
+#    poll:
+#      enabled: true
+#      max-connections: 1
+    queue:
+      payment:
+        concurrency: 1
+        mq: Q1.TO.DEV
+        dlq: Q1.TO.DEV.DLQ
 #    sendingQueueName: DEV.QUEUE.1
 #    receivingQueueName: DEV.QUEUE.1
 

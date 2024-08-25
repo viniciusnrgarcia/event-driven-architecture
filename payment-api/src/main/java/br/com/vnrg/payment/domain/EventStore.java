@@ -1,6 +1,6 @@
 package br.com.vnrg.payment.domain;
 
-public record EventStore(Long id,
+public record EventStore(String id,
                          String createdBy,
                          String json) {
 

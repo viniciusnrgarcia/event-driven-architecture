@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS payment (
     customer_id INTEGER NOT NULL,
     transaction_id INTEGER,
     status INTEGER,
-    status_description VARCHAR(50) NULL
+    status_description VARCHAR(50) NULL,
+    uuid VARCHAR(100) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS payment_error (
@@ -17,21 +18,22 @@ CREATE TABLE IF NOT EXISTS payment_error (
     customer_id INTEGER NULL,
     transaction_id INTEGER null,
     status INTEGER null,
-    status_description VARCHAR(50) NULL
+    status_description VARCHAR(50) NULL,
+    uuid VARCHAR(100) NULL
 );
 
 
 -- CREATE UNLOGGED TABLE IF NOT EXISTS transactions_1 (
-CREATE TABLE IF NOT EXISTS payment_transaction (
-    id INTEGER NULL,
-    amount DECIMAL(20, 2) NOT NULL,
-    customer_id INTEGER NOT NULL,
-    transaction_id INTEGER,
-    status INTEGER,
-    status_description VARCHAR(50) NULL
-);
-CREATE INDEX idx_id_1 ON payment_transaction(id);
-CREATE INDEX idx_customer_id_1 ON payment_transaction(customer_id);
+--CREATE TABLE IF NOT EXISTS payment_transaction (
+--    id INTEGER NULL,
+--    amount DECIMAL(20, 2) NOT NULL,
+--    customer_id INTEGER NOT NULL,
+--    transaction_id INTEGER,
+--    status INTEGER,
+--    status_description VARCHAR(50) NULL
+--);
+--CREATE INDEX idx_id_1 ON payment_transaction(id);
+--CREATE INDEX idx_customer_id_1 ON payment_transaction(customer_id);
 
 -- CREATE INDEX idx_customer_id ON transactions(id, created_at);
 -- CREATE INDEX idx_cliente_realizada_em ON transacoes (cliente_id, realizada_em);
@@ -48,7 +50,7 @@ CREATE INDEX idx_customer_id_1 ON payment_transaction(customer_id);
 
 
 CREATE TABLE IF NOT EXISTS event_store (
-    id INTEGER NULL,
+    id varchar(100) null,
     created_at timestamp with time zone default current_timestamp,
     created_by varchar(100) null,
     json JSONB null

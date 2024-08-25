@@ -15,14 +15,14 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class PaymentCreatedProducer {
 
-    private final KafkaTemplate<Long, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
     private final EventStoreRepository eventStoreRepository;
 
-    public void sendMessage(Long key, String message) {
+    public void sendMessage(String key, String message) {
         try {
             this.eventStoreRepository.save(new EventStore(key, "payment-api", message));
 
-            CompletableFuture<SendResult<Long, String>> future = kafkaTemplate.send("payment-created", key, message);
+            CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("payment-validated", key, message);
             future.whenComplete((result, ex) -> {
                 if (ex == null) {
                     log.info("sent message='{}' with offset={}", message, result.getRecordMetadata().offset());
@@ -37,17 +37,9 @@ public class PaymentCreatedProducer {
         }
     }
 
-//    public void sendMessageInTransaction(String message) {
+//    public void send(String key, String message) {
 //        try {
-//            CompletableFuture<SendResult<Integer, String>> future = kafkaTemplate.executeInTransaction(t -> t.send("payment-created", message));
-//            future.whenComplete((result, ex) -> {
-//                if (ex == null) {
-//                    log.info("sent message='{}' with offset={}", message, result.getRecordMetadata().offset());
-//                } else {
-//                    // handleFailure(data, record, ex);
-//                    log.error("failed to send message='{}'", message, ex);
-//                }
-//            });
+//            kafkaTemplate.executeInTransaction(t -> t.send("payment-validated", message)).get();
 //        } catch (Exception e) {
 //            throw new RuntimeException(e);
 //        }

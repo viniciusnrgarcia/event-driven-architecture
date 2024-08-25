@@ -1,5 +1,6 @@
 package br.com.vnrg.payment.api;
 
+import br.com.vnrg.payment.api.request.PaymentRequest;
 import br.com.vnrg.payment.domain.Payment;
 import br.com.vnrg.payment.enums.PaymentStatus;
 import br.com.vnrg.payment.producer.PaymentCreatedProducer;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -44,16 +47,17 @@ public class PaymentController {
      */
     @PostMapping(path = "/payment-id")
     public ResponseEntity<Void> createPaymentId(@RequestBody PaymentRequest paymentRequest) {
-        // var id = this.paymentRepository.getPaymentId();
         var paymentCreated = new Payment(
                 paymentRequest.id(),
                 paymentRequest.amount(),
                 paymentRequest.customerId(),
                 paymentRequest.transactionId(),
                 PaymentStatus.ofNullableFromValue(paymentRequest.status()).getCode(),
-                PaymentStatus.ofNullableFromValue(paymentRequest.status()));
+                PaymentStatus.ofNullableFromValue(paymentRequest.status()),
+                paymentRequest.uuid()
+        );
         try {
-            this.savePayment(paymentRequest);
+            this.paymentRepository.savePayment(paymentCreated);
         } catch (Exception e) {
             log.error("Error ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
             // ignore exception to duplicate events in topic
@@ -61,32 +65,32 @@ public class PaymentController {
 
         try {
             this.sendMessage(paymentCreated);
+            return ResponseEntity.ok().build();
 
         } catch (Exception e) {
             log.error("Transaction error ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
-        return ResponseEntity.ok().build();
-
     }
 
     private void sendMessage(Payment paymentCreated) throws JsonProcessingException {
         var json = mapper.writeValueAsString(paymentCreated);
-        this.paymentCreatedProducer.sendMessage(paymentCreated.getId(), json);
+        this.paymentCreatedProducer.sendMessage(paymentCreated.getUuid(), json);
         log.info("Send Message  ID: {}, Message: {}", paymentCreated.getTransactionId(), json);
     }
 
 
     private Payment savePayment(PaymentRequest paymentRequest) {
-        var payment = new Payment(paymentRequest.id(),
+        var sequenceId = this.paymentRepository.getPaymentId();
+
+        var payment = new Payment(sequenceId,
                 paymentRequest.amount(),
                 paymentRequest.customerId(),
                 paymentRequest.transactionId(),
                 PaymentStatus.ofNullableFromValue(paymentRequest.status()).getCode(),
-                PaymentStatus.ofNullableFromValue(paymentRequest.status()));
-
-        var id = this.paymentRepository.save(payment);
-        payment.setId(id);
+                PaymentStatus.ofNullableFromValue(paymentRequest.status()),
+                UUID.randomUUID().toString());
+        this.paymentRepository.savePayment(payment);
         return payment;
     }
 

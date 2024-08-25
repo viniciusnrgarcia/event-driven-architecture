@@ -13,7 +13,7 @@ input_file = os.path.join(project_dir, input_file_name)
 
 
 def post(request):
-    url = 'http://localhost:8080/payment-id'
+    url = 'http://localhost:8080/paymentd'
     headers = {
         'Content-Type': 'application/json',
         'accept': 'application/json'
@@ -45,8 +45,8 @@ t = time.perf_counter()
 
 
 payment_requests = []
-for i in range(1):
-    body = {'id': {0}, 'amount': '{1}', 'customerId': '{2}',
+for i in range(100000):
+    body = {'id': '{0}', 'amount': '{1}', 'customerId': '{2}',
             'transactionId': '{3}', 'status': 0}
     body['id'] = i
     body['amount'] = randrange(15)

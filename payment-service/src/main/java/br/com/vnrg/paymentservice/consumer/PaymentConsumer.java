@@ -1,4 +1,4 @@
-package br.com.vnrg.paymentservice.messaging;
+package br.com.vnrg.paymentservice.consumer;
 
 import br.com.vnrg.paymentservice.domain.EventStore;
 import br.com.vnrg.paymentservice.domain.Payment;
@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Component;
 
@@ -34,12 +35,13 @@ public class PaymentConsumer {
             // errorHandler = "validationErrorHandler"
     )
 //    @Transactional("paymentTransactionManager")
-    public void listen(String message, Acknowledgment ack, @Headers Map<String, Object> headers) throws JsonProcessingException {
+    public void listen(
+            @Header(KafkaHeaders.RECEIVED_KEY) String messageKey,
+            String message, Acknowledgment ack) throws JsonProcessingException {
         Payment payment = null;
         try {
             payment = this.mapper.readValue(message, Payment.class);
-            var messageKey = headers.get(KafkaHeaders.KEY);
-            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service", mapper.writeValueAsString(payment)));
+            this.eventStoreRepository.save(new EventStore(payment.getUuid(), "payment-service", mapper.writeValueAsString(payment)));
 
             log.info("Consumed message key: {} message content: {} ", messageKey, message);
 
@@ -57,7 +59,7 @@ public class PaymentConsumer {
                 // se evento já processado, ou com status indisponível para pagamento ignora o mesmo
                 log.error("Transaction ID: {}, Status: {}", payment.getTransactionId(), payment.getStatus());
                 this.paymentErrorRepository.save(payment);
-                this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service",
+                this.eventStoreRepository.save(new EventStore(payment.getUuid(), "payment-service",
                         mapper.writeValueAsString(payment)));
             }
 
@@ -82,8 +84,8 @@ public class PaymentConsumer {
             this.paymentRepository.updateStatus(payment, PaymentStatus.SENT);
 
             var paymentSend = new Payment(payment.getId(), payment.getAmount(), payment.getCustomerId(),
-                    payment.getTransactionId(), PaymentStatus.SENT.getCode(), PaymentStatus.SENT);
-            this.eventStoreRepository.save(new EventStore(payment.getId(), "payment-service", mapper.writeValueAsString(paymentSend)));
+                    payment.getTransactionId(), PaymentStatus.SENT.getCode(), PaymentStatus.SENT, payment.getUuid());
+            this.eventStoreRepository.save(new EventStore(payment.getUuid(), "payment-service", mapper.writeValueAsString(paymentSend)));
             log.info("Transaction ID: {}, Status: {}", payment.getTransactionId(), payment.getStatus());
 
         } catch (Exception e) {

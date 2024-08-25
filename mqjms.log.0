@@ -1,0 +1,86 @@
+August 11, 2024 at 11:55:06 PM BRT[org.springframework.jms.JmsListenerEndpointContainer#0-1] com.ibm.msg.client.jakarta.jms.internal.JmsProviderExceptionListener
+An exception has been delivered to the connection's exception listener: '
+                       Message : com.ibm.msg.client.jakarta.jms.DetailedJMSException: JMSWMQ1107: A problem with this connection has occurred.
+An error has occurred with the IBM MQ JMS connection.
+Use the linked exception to determine the cause of this error.
+                         Class : class com.ibm.msg.client.jakarta.jms.DetailedJMSException
+                         Stack : com.ibm.msg.client.jakarta.wmq.common.internal.Reason.reasonToException(Reason.java:595)
+                               : com.ibm.msg.client.jakarta.wmq.common.internal.Reason.createException(Reason.java:215)
+                               : com.ibm.msg.client.jakarta.wmq.internal.WMQSession.syncpoint(WMQSession.java:1991)
+                               : com.ibm.msg.client.jakarta.wmq.internal.WMQSession.rollback(WMQSession.java:1838)
+                               : com.ibm.msg.client.jakarta.jms.internal.JmsSessionImpl.rollbackTransaction(JmsSessionImpl.java:2878)
+                               : com.ibm.msg.client.jakarta.jms.internal.JmsSessionImpl.rollback(JmsSessionImpl.java:2101)
+                               : com.ibm.mq.jakarta.jms.MQSession.rollback(MQSession.java:952)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-2)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+                               : jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+                               : java.lang.reflect.Method.invoke(Method.java:568)
+                               : org.springframework.jms.connection.CachingConnectionFactory$CachedSessionInvocationHandler.invoke(CachingConnectionFactory.java:422)
+                               : jdk.proxy2.$Proxy77.rollback(null:-1)
+                               : org.springframework.jms.support.JmsUtils.rollbackIfNecessary(JmsUtils.java:233)
+                               : org.springframework.jms.listener.AbstractMessageListenerContainer.rollbackOnExceptionIfNecessary(AbstractMessageListenerContainer.java:867)
+                               : org.springframework.jms.listener.AbstractMessageListenerContainer.doExecuteListener(AbstractMessageListenerContainer.java:722)
+                               : org.springframework.jms.listener.AbstractPollingMessageListenerContainer.doReceiveAndExecute(AbstractPollingMessageListenerContainer.java:333)
+                               : org.springframework.jms.listener.AbstractPollingMessageListenerContainer.receiveAndExecute(AbstractPollingMessageListenerContainer.java:270)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.invokeListener(DefaultMessageListenerContainer.java:1257)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.executeOngoingLoop(DefaultMessageListenerContainer.java:1247)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.run(DefaultMessageListenerContainer.java:1140)
+                               : java.lang.Thread.run(Thread.java:840)
+     Caused by [1] --> Message : com.ibm.mq.MQException: JMSCMQ0001: IBM MQ call failed with compcode '2' ('MQCC_FAILED') reason '2009' ('MQRC_CONNECTION_BROKEN').
+                         Class : class com.ibm.mq.MQException
+                         Stack : com.ibm.msg.client.jakarta.wmq.common.internal.Reason.createException(Reason.java:203)
+                               : com.ibm.msg.client.jakarta.wmq.internal.WMQSession.syncpoint(WMQSession.java:1991)
+                               : com.ibm.msg.client.jakarta.wmq.internal.WMQSession.rollback(WMQSession.java:1838)
+                               : com.ibm.msg.client.jakarta.jms.internal.JmsSessionImpl.rollbackTransaction(JmsSessionImpl.java:2878)
+                               : com.ibm.msg.client.jakarta.jms.internal.JmsSessionImpl.rollback(JmsSessionImpl.java:2101)
+                               : com.ibm.mq.jakarta.jms.MQSession.rollback(MQSession.java:952)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-2)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+                               : jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+                               : java.lang.reflect.Method.invoke(Method.java:568)
+                               : org.springframework.jms.connection.CachingConnectionFactory$CachedSessionInvocationHandler.invoke(CachingConnectionFactory.java:422)
+                               : jdk.proxy2.$Proxy77.rollback(null:-1)
+                               : org.springframework.jms.support.JmsUtils.rollbackIfNecessary(JmsUtils.java:233)
+                               : org.springframework.jms.listener.AbstractMessageListenerContainer.rollbackOnExceptionIfNecessary(AbstractMessageListenerContainer.java:867)
+                               : org.springframework.jms.listener.AbstractMessageListenerContainer.doExecuteListener(AbstractMessageListenerContainer.java:722)
+                               : org.springframework.jms.listener.AbstractPollingMessageListenerContainer.doReceiveAndExecute(AbstractPollingMessageListenerContainer.java:333)
+                               : org.springframework.jms.listener.AbstractPollingMessageListenerContainer.receiveAndExecute(AbstractPollingMessageListenerContainer.java:270)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.invokeListener(DefaultMessageListenerContainer.java:1257)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.executeOngoingLoop(DefaultMessageListenerContainer.java:1247)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.run(DefaultMessageListenerContainer.java:1140)
+                               : java.lang.Thread.run(Thread.java:840)
+     Caused by [2] --> Message : com.ibm.mq.jmqi.JmqiException: CC=2;RC=2009
+                         Class : class com.ibm.mq.jmqi.JmqiException
+                         Stack : com.ibm.mq.jmqi.remote.impl.RemoteSession.receiveAsyncTsh(RemoteSession.java:632)
+                               : com.ibm.mq.jmqi.remote.impl.RemoteSession.receiveTSH(RemoteSession.java:826)
+                               : com.ibm.mq.jmqi.remote.impl.RemoteSession.receiveMQIFlow(RemoteSession.java:1532)
+                               : com.ibm.mq.jmqi.remote.api.RemoteFAP.MQBACK(RemoteFAP.java:9979)
+                               : com.ibm.mq.jmqi.monitoring.JmqiInterceptAdapter.MQBACK(JmqiInterceptAdapter.java:133)
+                               : com.ibm.msg.client.jakarta.wmq.internal.WMQSession.syncpoint(WMQSession.java:1973)
+                               : com.ibm.msg.client.jakarta.wmq.internal.WMQSession.rollback(WMQSession.java:1838)
+                               : com.ibm.msg.client.jakarta.jms.internal.JmsSessionImpl.rollbackTransaction(JmsSessionImpl.java:2878)
+                               : com.ibm.msg.client.jakarta.jms.internal.JmsSessionImpl.rollback(JmsSessionImpl.java:2101)
+                               : com.ibm.mq.jakarta.jms.MQSession.rollback(MQSession.java:952)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(NativeMethodAccessorImpl.java:-2)
+                               : jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+                               : jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+                               : java.lang.reflect.Method.invoke(Method.java:568)
+                               : org.springframework.jms.connection.CachingConnectionFactory$CachedSessionInvocationHandler.invoke(CachingConnectionFactory.java:422)
+                               : jdk.proxy2.$Proxy77.rollback(null:-1)
+                               : org.springframework.jms.support.JmsUtils.rollbackIfNecessary(JmsUtils.java:233)
+                               : org.springframework.jms.listener.AbstractMessageListenerContainer.rollbackOnExceptionIfNecessary(AbstractMessageListenerContainer.java:867)
+                               : org.springframework.jms.listener.AbstractMessageListenerContainer.doExecuteListener(AbstractMessageListenerContainer.java:722)
+                               : org.springframework.jms.listener.AbstractPollingMessageListenerContainer.doReceiveAndExecute(AbstractPollingMessageListenerContainer.java:333)
+                               : org.springframework.jms.listener.AbstractPollingMessageListenerContainer.receiveAndExecute(AbstractPollingMessageListenerContainer.java:270)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.invokeListener(DefaultMessageListenerContainer.java:1257)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.executeOngoingLoop(DefaultMessageListenerContainer.java:1247)
+                               : org.springframework.jms.listener.DefaultMessageListenerContainer$AsyncMessageListenerInvoker.run(DefaultMessageListenerContainer.java:1140)
+                               : java.lang.Thread.run(Thread.java:840)
+'.
+
+EXPLANATION:
+null
+
+ACTION:
+Review the exception details for further information.
+--------------------------------------------------------------------

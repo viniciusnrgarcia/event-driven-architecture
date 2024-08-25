@@ -107,3 +107,11 @@ logging:
 environment:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS:100} # ms
+    consumer:
+      payment-validated:
+        id: ${KAFKA_CONSUMER_ID:payment-service-id}
+        group-id: ${KAFKA_CONSUMER_GROUP_ID:payment-service-group}
+        concurrency: ${KAFKA_CONSUMER_CONCURRENCY:10}
+        auto-startup: ${KAFKA_CONSUMER_AUTO_STARTUP:false}
+        topics: ${KAFKA_CONSUMER_TOPICS:payment-validated}

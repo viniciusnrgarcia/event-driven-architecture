@@ -21,5 +21,6 @@ public class Payment implements Serializable {
     private long transactionId;
     private Integer status;
     private PaymentStatus statusDescription;
+    private String uuid;
 
 }

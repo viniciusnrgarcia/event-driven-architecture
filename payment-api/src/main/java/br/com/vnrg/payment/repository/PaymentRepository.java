@@ -34,12 +34,6 @@ public class PaymentRepository {
     @Transactional
     public Long save(Payment payment) {
         try {
-
-            if (payment.getId() != null) {
-                this.save(payment, payment.getId());
-                return payment.getId();
-            }
-
             KeyHolder keyHolder = new GeneratedKeyHolder();
 
             this.jdbcClient.sql("""
@@ -68,20 +62,21 @@ public class PaymentRepository {
 
 
     @Transactional
-    public void save(Payment payment, long id) {
+    public void savePayment(Payment payment) {
         try {
-            var result = this.jdbcClient.sql("""
-                              INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description)
+            this.jdbcClient.sql("""
+                              INSERT INTO payment (id, amount, customer_id, transaction_id, status, status_description, uuid)
                               VALUES (
-                              :id, :amount, :customerId, :transactionId, :status, :statusDescription)
+                              :id, :amount, :customerId, :transactionId, :status, :statusDescription, :uuid)
                             """
                     )
-                    .param("id", id)
+                    .param("id", payment.getId())
                     .param("amount", payment.getAmount())
                     .param("customerId", payment.getCustomerId())
                     .param("transactionId", payment.getTransactionId())
                     .param("status", payment.getStatus())
                     .param("statusDescription", payment.getStatusDescription().name())
+                    .param("uuid", payment.getUuid())
                     .update();
 
         } catch (Exception e) {

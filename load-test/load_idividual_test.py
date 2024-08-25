@@ -5,6 +5,7 @@ import sys
 import os
 # import csv
 from random import randrange
+import uuid
 
 
 project_dir = os.path.dirname(__file__)
@@ -31,7 +32,7 @@ def post(request):
         print(e)
         sys.exit(1)
     finally:
-        time.sleep(1)
+        time.sleep(0)
 
 
 t = time.perf_counter()
@@ -45,9 +46,9 @@ t = time.perf_counter()
 
 
 payment_requests = []
-for i in range(1):
-    body = {'id': {0}, 'amount': '{1}', 'customerId': '{2}',
-            'transactionId': '{3}', 'status': 0}
+for i in range(5000):
+    body = {'id': '{0}', 'amount': '{1}', 'customerId': '{2}',
+            'transactionId': '{3}', 'status': 0, 'uuid': str(uuid.uuid4())}
     body['id'] = i
     body['amount'] = randrange(15)
     body['customerId'] = randrange(10)

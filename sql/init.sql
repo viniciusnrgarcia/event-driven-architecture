@@ -12,6 +12,12 @@ CREATE TABLE IF NOT EXISTS payment (
     uuid VARCHAR(100) UNIQUE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS payment_event (
+    status INTEGER,
+    uuid VARCHAR(100) NOT NULL,
+    primary key (status, uuid)
+);
+
 CREATE TABLE IF NOT EXISTS payment_error (
     id INTEGER NULL,
     amount DECIMAL(20, 2) NULL,

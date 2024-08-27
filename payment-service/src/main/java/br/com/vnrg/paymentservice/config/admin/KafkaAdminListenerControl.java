@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 @EnableScheduling
 @Component
@@ -23,9 +24,9 @@ public class KafkaAdminListenerControl {
         this.jdbcClient = jdbcClient;
     }
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelayString = "${environment.kafka.admin-listeners-control:30000}")
     public void pauseResume() {
-        var containersStatus = this.listenerContainerStatus();
+        var containersStatus = this.listenerContainerStatus(this.registry.getListenerContainerIds());
         this.registry.getListenerContainers().forEach(l -> {
                     containersStatus
                             .stream()
@@ -50,10 +51,11 @@ public class KafkaAdminListenerControl {
         );
     }
 
-    private List<KafkaListenersControl> listenerContainerStatus() {
+    private List<KafkaListenersControl> listenerContainerStatus(Set<String> listenerContainerIds) {
         return this.jdbcClient.sql("""
-                        select listener_id, status from kafka_listeners_control
+                        select listener_id, status from kafka_listeners_control where listener_id in (:listenerContainerIds)
                         """)
+                .param("listenerContainerIds", listenerContainerIds)
                 .query((rs, rowNum) -> new KafkaListenersControl(
                         rs.getString("listener_id"),
                         rs.getInt("status")

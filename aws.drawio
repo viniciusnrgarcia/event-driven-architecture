@@ -1,9 +1,12 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36" version="24.7.6">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36" version="24.7.7">
   <diagram name="Page-1" id="aaaa8250-4180-3840-79b5-4cada1eebb92">
-    <mxGraphModel dx="3379" dy="-622" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+    <mxGraphModel dx="2895" dy="-417" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="DVq-GLnDHzkROYQ9wC95-6" value="Transação" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="-990" y="4485" width="59" height="80" as="geometry" />
+        </mxCell>
         <mxCell id="8n4HYUna0BRvYn9VdKNQ-233" value="" style="group;rounded=1;" parent="1" vertex="1" connectable="0">
           <mxGeometry x="-314" y="3536" width="1812" height="594" as="geometry" />
         </mxCell>
@@ -477,32 +480,11 @@
         <mxCell id="mRyLPyqAp4D9J7UMtu-6-7" value="- admin broker" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;rounded=1;" parent="1" vertex="1">
           <mxGeometry x="-81" y="3185" width="95" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-4" value="Criar serviço para poder controlar o topico kafka (para listener, retomar, etc.,)" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2097" y="3750" width="111" height="111" as="geometry" />
+        <mxCell id="DVq-GLnDHzkROYQ9wC95-4" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://www.cleo.com/sites/default/files/2023-12/ibm-mq-integration.png;clipPath=inset(12.36% 24.67% 12.36% 25%);rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="-847" y="4347" width="92.4" height="82" as="geometry" />
         </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-5" value="Criar serviço para injeção de transações IBM MQ de maneira constante&lt;div&gt;(mock)&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2100" y="3909" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-6" value="Criar ms connector, para consumir os eventos IBM MQ, persistir, e gerar os eventos KAFKA" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2103" y="4047" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-7" value="Criar também solução batck&amp;nbsp;&lt;div&gt;para agrupar transações antes de gerar eventos&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-1958" y="4048" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-8" value="Criar serviço para consumir e criar os pagamentos (com retry e DLQ)" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2096" y="4176" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-9" value="Criar serviço cadatro API para retornar informações para consumidor pagamentos" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2093" y="4321" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-10" value="Crise serviço para simular análise de fraudes (sync e async)" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2100" y="4459" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-11" value="Criar APi paa receber callback de prevenção enviar topic&amp;nbsp;&lt;div&gt;pagamento validado&lt;/div&gt;" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2098" y="4612" width="111" height="111" as="geometry" />
-        </mxCell>
-        <mxCell id="WjiKPggIOsOp9bSHbbAo-12" value="Criar gateway de pagamento para liquidação (chamar API externa - criar MOCK)" style="whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
-          <mxGeometry x="-2084" y="4778" width="111" height="111" as="geometry" />
+        <mxCell id="DVq-GLnDHzkROYQ9wC95-5" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://www.onetrust.com/content/dam/onetrust/brand/content/graphic/thumbnail/integrations/OT-integrations-logo-IBM-DB2.png;clipPath=inset(18.92% 19.67% 19.59% 19%);rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="-946" y="4550" width="40.6" height="40.16" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

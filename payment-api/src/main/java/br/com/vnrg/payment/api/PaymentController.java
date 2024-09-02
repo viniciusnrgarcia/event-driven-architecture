@@ -58,6 +58,7 @@ public class PaymentController {
         );
         try {
             this.paymentRepository.savePayment(paymentCreated);
+            this.paymentRepository.savePaymentEvent(paymentCreated);
         } catch (Exception e) {
             log.error("Error ID: {}, Error: {}", paymentCreated.getTransactionId(), e.getMessage());
             // ignore exception to duplicate events in topic
@@ -91,6 +92,7 @@ public class PaymentController {
                 PaymentStatus.ofNullableFromValue(paymentRequest.status()),
                 UUID.randomUUID().toString());
         this.paymentRepository.savePayment(payment);
+        this.paymentRepository.savePaymentEvent(payment);
         return payment;
     }
 

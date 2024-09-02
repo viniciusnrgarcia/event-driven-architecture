@@ -47,6 +47,8 @@ public class PaymentConsumer {
             // Atualiza para em processamento
             // exactly once commit
             this.paymentRepository.updateStatus(payment, PaymentStatus.PROCESSING);
+            payment.setStatus(PaymentStatus.PROCESSING.getCode());
+            this.paymentRepository.savePaymentEvent(payment);
             // processamento do evento e controle de status
             this.sendPayment(payment);
 
@@ -80,7 +82,9 @@ public class PaymentConsumer {
             }
 
             // Atualiza para pagamento enviado
+            payment.setStatus(PaymentStatus.SENT.getCode());
             this.paymentRepository.updateStatus(payment, PaymentStatus.SENT);
+            this.paymentRepository.savePaymentEvent(payment);
 
             var paymentSend = new Payment(payment.getId(), payment.getAmount(), payment.getCustomerId(),
                     payment.getTransactionId(), PaymentStatus.SENT.getCode(), PaymentStatus.SENT, payment.getUuid());

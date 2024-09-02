@@ -80,10 +80,27 @@ public class PaymentRepository {
                     .update();
 
         } catch (Exception e) {
-            log.error("Error save payment with id: {}", e.getMessage());
+            log.error("savePayment Error save payment with id: {}", e.getMessage());
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Transactional
+    public void savePaymentEvent(Payment payment) {
+        try {
+            this.jdbcClient.sql("""
+                            INSERT INTO payment_event (status, uuid)
+                            VALUES (:status, :uuid)
+                            """)
+                    .param("status", payment.getStatus())
+                    .param("uuid", payment.getUuid())
+                    .update();
+
+        } catch (Exception e) {
+            log.error("savePaymentEvent Error save payment with id: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
 }

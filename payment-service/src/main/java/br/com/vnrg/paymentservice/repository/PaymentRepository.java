@@ -69,12 +69,30 @@ public class PaymentRepository {
                     .update();
 
             // se evento já processado, ou com status indisponível para pagamento ignora o mesmo
-            if (rowsAffected == 0) {
-                throw new RuntimeException("Error updating status");
-            }
+            // if (rowsAffected == 0) {
+            //    throw new RuntimeException("Error updating status");
+            // }
+
 
         } catch (Exception e) {
             log.error("Error updating status: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void savePaymentEvent(Payment payment) {
+        try {
+            this.jdbcClient.sql("""
+                            INSERT INTO payment_event (status, uuid)
+                            VALUES (:status, :uuid)
+                            """)
+                    .param("status", payment.getStatus())
+                    .param("uuid", payment.getUuid())
+                    .update();
+
+        } catch (Exception e) {
+            log.error("savePaymentEvent Error save payment with id: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }

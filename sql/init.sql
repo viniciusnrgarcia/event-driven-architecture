@@ -77,5 +77,6 @@ CREATE TABLE IF NOT EXISTS kafka_listeners_control (
 
 INSERT INTO kafka_listeners_control (listener_id, status) VALUES
     ('payment-service-id', 0),
-    ('payment-constomer-id', 0)
+    ('payment-constomer-id', 0),
+    ('payment-batch-service-id', 0)
 ;

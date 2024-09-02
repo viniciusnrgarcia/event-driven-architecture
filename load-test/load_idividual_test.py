@@ -46,7 +46,7 @@ t = time.perf_counter()
 
 
 payment_requests = []
-for i in range(1):
+for i in range(19):
     body = {'id': '{0}', 'amount': '{1}', 'customerId': '{2}',
             'transactionId': '{3}', 'status': 0, 'uuid': str(uuid.uuid4())}
     body['id'] = i

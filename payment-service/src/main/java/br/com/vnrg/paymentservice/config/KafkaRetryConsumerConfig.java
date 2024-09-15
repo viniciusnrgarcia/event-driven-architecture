@@ -1,8 +1,9 @@
 package br.com.vnrg.paymentservice.config;
 
-import lombok.RequiredArgsConstructor;
+import br.com.vnrg.paymentservice.exceptions.RetryErrorException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,73 +15,51 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
 @EnableKafka
-@RequiredArgsConstructor
-public class KafkaConsumerConfig {
+public class KafkaRetryConsumerConfig {
     // TODO configure properties + handle errors + retries + backoff
 
     @Value("${environment.kafka.bootstrap-servers}")
     public String bootstrapServers;
 
-    @Value("${environment.kafka.idle-between-polls}")
-    public Long idleBetweenPolls;
-
-    // private final CustomDefaultErrorHandler customDefaultErrorHandler;
-    private final DefaultErrorHandler customErrorHandler;
+    @Value("${environment.kafka.retry.idle-between-polls}")
+    public Long idleBetweenPollsRetry;
 
 
     @Bean
-    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
+    @Qualifier("retryKafkaListenerContainerFactory")
+    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> retryKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(retryConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
-        factory.getContainerProperties().setIdleBetweenPolls(idleBetweenPolls); // The sleep interval in milliseconds used in the main
-        factory.getContainerProperties().setPollTimeout(60_000);
+        factory.getContainerProperties().setIdleBetweenPolls(idleBetweenPollsRetry); // The sleep interval in milliseconds used in the main
+        factory.getContainerProperties().setPollTimeout(120_000);
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
-        // factory.setConcurrency(1);
-        // factory.setCommonErrorHandler(errorHandler()); // todo: handle errors
-        factory.setCommonErrorHandler(this.customErrorHandler);
-
-//        factory.setReplyTemplate(
-//        );
-
+        factory.setCommonErrorHandler(errorHandler()); // todo: handle errors
         return factory;
     }
 
-//    private RetryTemplate retryTemplate() {
-//        RetryTemplate retryTemplate = new RetryTemplate();
-//        /* aqui a política de repetição é usada para definir o número de tentativas de repetição e quais exceções você deseja tentar novamente.*/
-//        retryTemplate.setRetryPolicy(getSimpleRetryPolicy());
-//        return retryTemplate;
-//    }
-//    private SimpleRetryPolicy getSimpleRetryPolicy() {
-//        Map<Class<? extends Throwable>, Boolean> exceptionMap = new HashMap<>();
-//        exceptionMap.put(IllegalArgumentException.class, false);
-//        exceptionMap.put(TimeoutException.class, true);
-//
-//        return new SimpleRetryPolicy(3,exceptionMap,true);
-//    }
 
+    public DefaultErrorHandler errorHandler(){
+        FixedBackOff fixedBackOff = new FixedBackOff(5_000, 3);
+        DefaultErrorHandler eh = new DefaultErrorHandler((record, exception) -> {
+            // recover after 3 failures, with no back off - e.g. send to a dead-letter topic
+            // TODO: implement retry logic
+            System.out.println("-------- DEFAULT ERROR HANDLER --------  " + exception.getMessage());
+            System.out.println(exception.getMessage());
+        }, fixedBackOff);
+        eh.addRetryableExceptions(RetryErrorException.class);
+        eh.addNotRetryableExceptions(Exception.class);
 
-//    public DefaultErrorHandler errorHandler(){
-//        FixedBackOff fixedBackOff = new FixedBackOff(5_000, 3);
-//        DefaultErrorHandler eh = new DefaultErrorHandler((record, exception) -> {
-//            // recover after 3 failures, with no back off - e.g. send to a dead-letter topic
-//            // TODO: implement retry logic
-//            System.out.println("-------- DEFAULT ERROR HANDLER --------  " + exception.getMessage());
-//            System.out.println(exception.getMessage());
-//        }, fixedBackOff);
-//        eh.addRetryableExceptions(RetryErrorException.class);
-//        eh.addNotRetryableExceptions(Exception.class);
-//
-//        return eh;
-//    }
+        return eh;
+    }
 
     /*
     @Bean
@@ -94,11 +73,11 @@ public class KafkaConsumerConfig {
      */
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
+    @Qualifier("retryConsumerFactory")
+    public ConsumerFactory<String, String> retryConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 
-    // @Bean
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");

@@ -103,12 +103,13 @@ logging:
     org.springframework: ${LOG_LEVEL_SPRING:INFO}
     br.com.vnrg: ${LOG_LEVEL_PACKAGE:INFO}
 
-
 environment:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
     idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS:100} # ms
     admin-listeners-control: ${KAFKA_ADMIN_LISTENERS_CONTROL:30000}
+    retry:
+      idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS_RETRY:10000} # ms
     consumer:
       payment-validated:
         id: ${KAFKA_CONSUMER_ID:payment-service-id}
@@ -116,3 +117,9 @@ environment:
         concurrency: ${KAFKA_CONSUMER_CONCURRENCY:10}
         auto-startup: ${KAFKA_CONSUMER_AUTO_STARTUP:false}
         topics: ${KAFKA_CONSUMER_TOPICS:payment-validated}
+      retry-payment-validated:
+        id: ${KAFKA_CONSUMER_ID:payment-service-retry-id}
+        group-id: ${KAFKA_CONSUMER_GROUP_RETRY_ID:payment-service-retry-group}
+        concurrency: ${KAFKA_CONSUMER_RETRY_CONCURRENCY:10}
+        auto-startup: ${KAFKA_CONSUMER_AUTO_RETRY_STARTUP:false}
+        topics: ${KAFKA_CONSUMER_TOPICS:payment-validated-retry}

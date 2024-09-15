@@ -3,6 +3,8 @@ package br.com.vnrg.paymentservice.consumer;
 import br.com.vnrg.paymentservice.domain.EventStore;
 import br.com.vnrg.paymentservice.domain.Payment;
 import br.com.vnrg.paymentservice.enums.PaymentStatus;
+import br.com.vnrg.paymentservice.exceptions.IntegrationErrorException;
+import br.com.vnrg.paymentservice.exceptions.RetryErrorException;
 import br.com.vnrg.paymentservice.repository.EventStoreRepository;
 import br.com.vnrg.paymentservice.repository.PaymentErrorRepository;
 import br.com.vnrg.paymentservice.repository.PaymentRepository;
@@ -15,6 +17,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -26,6 +29,7 @@ public class PaymentConsumer {
     private final EventStoreRepository eventStoreRepository;
     private final ObjectMapper mapper = new ObjectMapper();
 
+
     @KafkaListener(id = "${environment.kafka.consumer.payment-validated.id}",
             topics = "${environment.kafka.consumer.payment-validated.topics}",
             groupId = "${environment.kafka.consumer.payment-validated.group-id}",
@@ -34,9 +38,10 @@ public class PaymentConsumer {
             // errorHandler = "validationErrorHandler"
     )
 //    @Transactional("paymentTransactionManager")
+    @Transactional
     public void listen(
             @Header(KafkaHeaders.RECEIVED_KEY) String messageKey,
-            String message, Acknowledgment ack) throws JsonProcessingException {
+            String message, Acknowledgment ack) throws JsonProcessingException, RetryErrorException, IntegrationErrorException {
         Payment payment = null;
         try {
             payment = this.mapper.readValue(message, Payment.class);
@@ -52,6 +57,12 @@ public class PaymentConsumer {
             // processamento do evento e controle de status
             this.sendPayment(payment);
 
+            // teste
+            throw new RetryErrorException("Error");
+
+        } catch (RetryErrorException retryErrorException) {
+            log.error("Retry Error: {}", retryErrorException.getMessage());
+            throw retryErrorException;
 
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
@@ -63,6 +74,11 @@ public class PaymentConsumer {
                 this.eventStoreRepository.save(new EventStore(payment.getUuid(), "payment-service",
                         mapper.writeValueAsString(payment)));
             }
+
+            // throw new RetryErrorException("Retry Error");
+            // throw new IntegrationErrorException("Retry Error");
+            // throw new RuntimeException("error");
+
 
         } finally {
             ack.acknowledge();

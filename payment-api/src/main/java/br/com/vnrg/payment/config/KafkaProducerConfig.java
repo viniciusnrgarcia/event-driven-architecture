@@ -16,7 +16,7 @@ import java.util.Map;
 public class KafkaProducerConfig {
 
     @Value("${environment.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+    public String bootstrapServers;
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
@@ -27,13 +27,17 @@ public class KafkaProducerConfig {
     public Map<String, Object> producerConfigs() {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
-        configMap.put(ProducerConfig.ACKS_CONFIG, "all"); // See https://kafka.apache.org/documentation/#producerconfigs_acks
         configMap.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
         configMap.put(ProducerConfig.RETRIES_CONFIG, "60000");
+        configMap.put(ProducerConfig.ACKS_CONFIG, "all"); // See https://kafka.apache.org/documentation/#producerconfigs_acks
         // configMap.put(ProducerConfig.LINGER_MS_CONFIG, "1");
         // configMap.put(ProducerConfig.BATCH_SIZE_CONFIG, "16384");
         // configMap.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
+
         configMap.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); // Ensure don't push duplicates messages
+        configMap.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "tx-payment-transaction-id");
+        configMap.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "60000");
+
         configMap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configMap.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         // See https://kafka.apache.org/documentation/#producerconfigs for more properties

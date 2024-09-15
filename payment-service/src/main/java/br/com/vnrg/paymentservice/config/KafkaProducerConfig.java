@@ -16,7 +16,7 @@ import java.util.Map;
 public class KafkaProducerConfig {
 
     @Value("${environment.kafka.bootstrap-servers}")
-    private String bootstrapServers;
+    public String bootstrapServers;
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
@@ -36,7 +36,7 @@ public class KafkaProducerConfig {
 
         configMap.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); // Ensure don't push duplicates messages
         configMap.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "tx-payment-transaction-id");
-
+        configMap.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "60000");
 
         configMap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configMap.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

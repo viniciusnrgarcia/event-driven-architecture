@@ -21,8 +21,9 @@ public class PaymentCreatedProducer {
     public void sendMessage(String key, String message) {
         try {
             this.eventStoreRepository.save(new EventStore(key, "payment-api", message));
+            this.kafkaTemplate.executeInTransaction(t -> t.send("payment-validated", key, message)).get();
 
-            CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("payment-validated", key, message);
+            /*CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("payment-validated", key, message);
             future.whenComplete((result, ex) -> {
                 if (ex == null) {
                     log.info("sent message='{}' with offset={}", message, result.getRecordMetadata().offset());
@@ -30,7 +31,7 @@ public class PaymentCreatedProducer {
                     log.error("failed to send message='{}'", message, ex);
                     // TODO send to retry topic (error)
                 }
-            });
+            });*/
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
             throw new RuntimeException(e);

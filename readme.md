@@ -11,3 +11,11 @@ https://docs.spring.io/spring-kafka/reference/index.html
 ### Spring Boot
 
 https://docs.spring.io/spring-boot/reference/messaging/kafka.html
+
+
+### Reference
+
+
+### Observações
+
+Se a configuração do producer Kafka “min.insyn.replicas” for especificada como 2 e apenas um broker estiver disponível.

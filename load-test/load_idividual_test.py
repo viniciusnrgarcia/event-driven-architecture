@@ -14,7 +14,7 @@ input_file = os.path.join(project_dir, input_file_name)
 
 
 def post(request):
-    url = 'http://localhost:8080/payment-id'
+    url = 'http://localhost:8080/payment'
     headers = {
         'Content-Type': 'application/json',
         'accept': 'application/json'
@@ -46,7 +46,7 @@ t = time.perf_counter()
 
 
 payment_requests = []
-for i in range(19):
+for i in range(1):
     body = {'id': '{0}', 'amount': '{1}', 'customerId': '{2}',
             'transactionId': '{3}', 'status': 0, 'uuid': str(uuid.uuid4())}
     body['id'] = i
@@ -55,9 +55,9 @@ for i in range(19):
     body['transactionId'] = randrange(20)
     payment_requests.append(body)
 
-    if i % 32 == 0:
-        print(f"MOD add item", i)
-        payment_requests.append(body)
+    #if i % 32 == 0:
+    #    print(f"MOD add item", i)
+    #    payment_requests.append(body)
 
 
 with ThreadPoolExecutor(max_workers=10) as executor:

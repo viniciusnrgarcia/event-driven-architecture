@@ -18,9 +18,12 @@ public class PaymentRetryConsumer {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    @KafkaListener(id = "payment-service-retry-id",
-            topics = "payment-validated-retry", groupId = "payment-service-retry-group", concurrency = "${listen.concurrency:1}",
-            autoStartup = "${listen.auto.start:false}"
+    @KafkaListener(id = "${environment.kafka.consumer.retry-payment-validated.id}",
+            topics = "${environment.kafka.consumer.retry-payment-validated.topics}",
+            groupId = "${environment.kafka.consumer.retry-payment-validated.group-id}",
+            concurrency = "${environment.kafka.consumer.retry-payment-validated.concurrency}",
+            autoStartup = "${environment.kafka.consumer.retry-payment-validated.auto-startup}"
+            // errorHandler = "validationErrorHandler"
     )
     public void listen(
             @Header(KafkaHeaders.RECEIVED_KEY) String messageKey,

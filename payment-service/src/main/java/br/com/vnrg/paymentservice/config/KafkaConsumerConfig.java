@@ -1,8 +1,8 @@
 package br.com.vnrg.paymentservice.config;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,6 @@ import java.util.Map;
 
 @Configuration
 @EnableKafka
-@RequiredArgsConstructor
 public class KafkaConsumerConfig {
     // TODO configure properties + handle errors + retries + backoff
 
@@ -30,8 +29,11 @@ public class KafkaConsumerConfig {
     @Value("${environment.kafka.idle-between-polls}")
     public Long idleBetweenPolls;
 
-    // private final CustomDefaultErrorHandler customDefaultErrorHandler;
-    private final DefaultErrorHandler customErrorHandler;
+//    private final DefaultErrorHandler retryErrorHandler;
+//
+//    public KafkaConsumerConfig(@Qualifier(value = "retryErrorHandler") DefaultErrorHandler retryErrorHandler) {
+//        this.retryErrorHandler = retryErrorHandler;
+//    }
 
 
     @Bean
@@ -45,11 +47,7 @@ public class KafkaConsumerConfig {
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
         // factory.setConcurrency(1);
         // factory.setCommonErrorHandler(errorHandler()); // todo: handle errors
-        factory.setCommonErrorHandler(this.customErrorHandler);
-
-//        factory.setReplyTemplate(
-//        );
-
+        // factory.setCommonErrorHandler(this.retryErrorHandler);
         return factory;
     }
 

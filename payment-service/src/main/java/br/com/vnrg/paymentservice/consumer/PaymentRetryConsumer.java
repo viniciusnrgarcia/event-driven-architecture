@@ -1,14 +1,11 @@
 package br.com.vnrg.paymentservice.consumer;
 
-import br.com.vnrg.paymentservice.domain.Payment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,16 +19,18 @@ public class PaymentRetryConsumer {
             topics = "${environment.kafka.consumer.retry-payment-validated.topics}",
             groupId = "${environment.kafka.consumer.retry-payment-validated.group-id}",
             concurrency = "${environment.kafka.consumer.retry-payment-validated.concurrency}",
-            autoStartup = "${environment.kafka.consumer.retry-payment-validated.auto-startup}"
+            autoStartup = "${environment.kafka.consumer.retry-payment-validated.auto-startup}",
+            containerFactory = "retryKafkaListenerContainerFactory"
             // errorHandler = "validationErrorHandler"
     )
     public void listen(
-            @Header(KafkaHeaders.RECEIVED_KEY) String messageKey,
+            // @Header(KafkaHeaders.RECEIVED_KEY) String messageKey,
             String message, Acknowledgment ack) throws JsonProcessingException {
-        Payment payment = null;
+//        Payment payment = null;
         try {
-            payment = this.mapper.readValue(message, Payment.class);
-            log.info("Consumed message retry with key: {} message content: {} ", messageKey, message);
+//            payment = this.mapper.readValue(message, Payment.class);
+            log.info(message);
+            // log.info("Consumed message retry with key: {} message content: {} ", messageKey, message);
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
         } finally {

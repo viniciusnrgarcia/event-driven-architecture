@@ -34,8 +34,8 @@ public class PaymentConsumer {
             topics = "${environment.kafka.consumer.payment-validated.topics}",
             groupId = "${environment.kafka.consumer.payment-validated.group-id}",
             concurrency = "${environment.kafka.consumer.payment-validated.concurrency}",
-            autoStartup = "${environment.kafka.consumer.payment-validated.auto-startup}"
-            // errorHandler = "validationErrorHandler"
+            autoStartup = "${environment.kafka.consumer.payment-validated.auto-startup}",
+            errorHandler = "retryErrorHandler"
     )
 //    @Transactional("paymentTransactionManager")
     @Transactional

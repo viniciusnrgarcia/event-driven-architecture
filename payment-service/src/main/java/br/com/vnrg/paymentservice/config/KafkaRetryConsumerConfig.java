@@ -40,7 +40,7 @@ public class KafkaRetryConsumerConfig {
         factory.setConsumerFactory(retryConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.getContainerProperties().setIdleBetweenPolls(idleBetweenPollsRetry); // The sleep interval in milliseconds used in the main
-        factory.getContainerProperties().setPollTimeout(120_000);
+        factory.getContainerProperties().setPollTimeout(5_000);
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
         factory.setCommonErrorHandler(errorHandler()); // todo: handle errors
         return factory;
@@ -61,16 +61,6 @@ public class KafkaRetryConsumerConfig {
         return eh;
     }
 
-    /*
-    @Bean
-    DefaultErrorHandler handler() {
-        ExponentialBackOffWithMaxRetries bo = new ExponentialBackOffWithMaxRetries(6);
-        bo.setInitialInterval(1_000L);
-        bo.setMultiplier(2.0);
-        bo.setMaxInterval(10_000L);
-        return new DefaultErrorHandler(myRecoverer, bo);
-    }
-     */
 
     @Bean
     @Qualifier("retryConsumerFactory")

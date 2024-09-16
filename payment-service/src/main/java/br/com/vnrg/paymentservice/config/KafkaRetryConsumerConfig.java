@@ -1,6 +1,7 @@
 package br.com.vnrg.paymentservice.config;
 
 import br.com.vnrg.paymentservice.exceptions.RetryErrorException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,6 +13,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -20,6 +22,7 @@ import org.springframework.util.backoff.FixedBackOff;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Configuration
 @EnableKafka
 public class KafkaRetryConsumerConfig {
@@ -31,6 +34,19 @@ public class KafkaRetryConsumerConfig {
     @Value("${environment.kafka.retry.idle-between-polls}")
     public Long idleBetweenPollsRetry;
 
+    /**
+     * Intervalo entre tentativas, de cada exception esperada ocorrida.
+     */
+    @Value("${environment.kafka.retry.interval:10000}")
+    private Long interval;
+
+    /**
+     * Número de retentativas antes de enviar para fila de RETRY.
+     */
+    @Value("${environment.kafka.retry.max-attempts:100}")
+    private Long maxAttempts;
+
+
 
     @Bean
     @Qualifier("retryKafkaListenerContainerFactory")
@@ -40,25 +56,20 @@ public class KafkaRetryConsumerConfig {
         factory.setConsumerFactory(retryConsumerFactory());
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         factory.getContainerProperties().setIdleBetweenPolls(idleBetweenPollsRetry); // The sleep interval in milliseconds used in the main
-        factory.getContainerProperties().setPollTimeout(5_000);
+        factory.getContainerProperties().setPollTimeout(idleBetweenPollsRetry * 2);
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
-        factory.setCommonErrorHandler(errorHandler()); // todo: handle errors
+        factory.setCommonErrorHandler(this.defaultRetryErrorHandler());
         return factory;
     }
 
-
-    public DefaultErrorHandler errorHandler(){
-        FixedBackOff fixedBackOff = new FixedBackOff(5_000, 3);
-        DefaultErrorHandler eh = new DefaultErrorHandler((record, exception) -> {
-            // recover after 3 failures, with no back off - e.g. send to a dead-letter topic
-            // TODO: implement retry logic
-            System.out.println("-------- DEFAULT ERROR HANDLER --------  " + exception.getMessage());
-            System.out.println(exception.getMessage());
-        }, fixedBackOff);
-        eh.addRetryableExceptions(RetryErrorException.class);
-        eh.addNotRetryableExceptions(Exception.class);
-
-        return eh;
+    private CommonErrorHandler defaultRetryErrorHandler() {
+            var fixedBackOff = new FixedBackOff(this.interval, this.maxAttempts);
+            var exceptionHandler = new DefaultErrorHandler((record, exception) -> {
+                log.error("Error handler: {}, record: {}", exception.getMessage(), record);
+            }, fixedBackOff);
+            exceptionHandler.addRetryableExceptions(RetryErrorException.class);
+            exceptionHandler.addNotRetryableExceptions(Exception.class);
+            return exceptionHandler;
     }
 
 
@@ -88,6 +99,7 @@ public class KafkaRetryConsumerConfig {
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "300000"); // specifica o máximo de tempo em milissegundos que um consumer dentro de um consumer group pode ficar sem enviar heartbeat antes de ser considerado inativo e provocar um rebalance.
         props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, "60000");
         props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "300000");
+        props.put(ConsumerConfig.RETRY_BACKOFF_MS_CONFIG, "1000");
         /**
          * Se você aumentar o fetch.min.bytes, por exemplo, com um valor maior que o padrão o consumer vai realizar
          * menos requests para o broker e irá trazer mais dados em um único batch, consequentemente irá reduzir a

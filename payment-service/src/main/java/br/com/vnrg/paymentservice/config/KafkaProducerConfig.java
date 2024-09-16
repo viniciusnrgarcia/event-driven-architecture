@@ -35,7 +35,7 @@ public class KafkaProducerConfig {
         // configMap.put(ProducerConfig.BUFFER_MEMORY_CONFIG, "33554432");
 
         configMap.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); // Ensure don't push duplicates messages
-        configMap.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "tx-payment-transaction-id");
+        configMap.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, "tx-payment-service-transaction-id");
         configMap.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "60000");
 
         configMap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

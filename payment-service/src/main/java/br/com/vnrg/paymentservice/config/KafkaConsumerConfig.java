@@ -2,6 +2,7 @@ package br.com.vnrg.paymentservice.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
@@ -21,7 +23,6 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class KafkaConsumerConfig {
-    // TODO configure properties + handle errors + retries + backoff
 
     @Value("${environment.kafka.bootstrap-servers}")
     public String bootstrapServers;
@@ -29,11 +30,12 @@ public class KafkaConsumerConfig {
     @Value("${environment.kafka.idle-between-polls}")
     public Long idleBetweenPolls;
 
-//    private final DefaultErrorHandler retryErrorHandler;
-//
-//    public KafkaConsumerConfig(@Qualifier(value = "retryErrorHandler") DefaultErrorHandler retryErrorHandler) {
-//        this.retryErrorHandler = retryErrorHandler;
-//    }
+    @Qualifier(value = "retryErrorHandler")
+    private final DefaultErrorHandler defaultRetryErrorHandler;
+
+    public KafkaConsumerConfig(DefaultErrorHandler defaultRetryErrorHandler) {
+        this.defaultRetryErrorHandler = defaultRetryErrorHandler;
+    }
 
 
     @Bean
@@ -46,50 +48,10 @@ public class KafkaConsumerConfig {
         factory.getContainerProperties().setPollTimeout(60_000);
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
         // factory.setConcurrency(1);
-        // factory.setCommonErrorHandler(errorHandler()); // todo: handle errors
-        // factory.setCommonErrorHandler(this.retryErrorHandler);
+        factory.setCommonErrorHandler(this.defaultRetryErrorHandler); // todo: handle errors
         return factory;
     }
 
-//    private RetryTemplate retryTemplate() {
-//        RetryTemplate retryTemplate = new RetryTemplate();
-//        /* aqui a política de repetição é usada para definir o número de tentativas de repetição e quais exceções você deseja tentar novamente.*/
-//        retryTemplate.setRetryPolicy(getSimpleRetryPolicy());
-//        return retryTemplate;
-//    }
-//    private SimpleRetryPolicy getSimpleRetryPolicy() {
-//        Map<Class<? extends Throwable>, Boolean> exceptionMap = new HashMap<>();
-//        exceptionMap.put(IllegalArgumentException.class, false);
-//        exceptionMap.put(TimeoutException.class, true);
-//
-//        return new SimpleRetryPolicy(3,exceptionMap,true);
-//    }
-
-
-//    public DefaultErrorHandler errorHandler(){
-//        FixedBackOff fixedBackOff = new FixedBackOff(5_000, 3);
-//        DefaultErrorHandler eh = new DefaultErrorHandler((record, exception) -> {
-//            // recover after 3 failures, with no back off - e.g. send to a dead-letter topic
-//            // TODO: implement retry logic
-//            System.out.println("-------- DEFAULT ERROR HANDLER --------  " + exception.getMessage());
-//            System.out.println(exception.getMessage());
-//        }, fixedBackOff);
-//        eh.addRetryableExceptions(RetryErrorException.class);
-//        eh.addNotRetryableExceptions(Exception.class);
-//
-//        return eh;
-//    }
-
-    /*
-    @Bean
-    DefaultErrorHandler handler() {
-        ExponentialBackOffWithMaxRetries bo = new ExponentialBackOffWithMaxRetries(6);
-        bo.setInitialInterval(1_000L);
-        bo.setMultiplier(2.0);
-        bo.setMaxInterval(10_000L);
-        return new DefaultErrorHandler(myRecoverer, bo);
-    }
-     */
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {

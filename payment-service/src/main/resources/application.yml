@@ -97,7 +97,7 @@ environment:
     idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS:100} # ms
     admin-listeners-control: ${KAFKA_ADMIN_LISTENERS_CONTROL:30000}
     retry:
-      idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS_RETRY:10000} # ms
+      idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS_RETRY:1000} # ms
       interval: ${KAFKA_RETRY_INTERVAL:1000} # ms
       max-attempts: ${KAFKA_RETRY_MAX_ATTEMPTS:0}
     consumer:

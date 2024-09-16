@@ -3,7 +3,6 @@ package br.com.vnrg.paymentservice.consumer;
 import br.com.vnrg.paymentservice.domain.EventStore;
 import br.com.vnrg.paymentservice.domain.Payment;
 import br.com.vnrg.paymentservice.enums.PaymentStatus;
-import br.com.vnrg.paymentservice.exceptions.IntegrationErrorException;
 import br.com.vnrg.paymentservice.exceptions.RetryErrorException;
 import br.com.vnrg.paymentservice.repository.EventStoreRepository;
 import br.com.vnrg.paymentservice.repository.PaymentErrorRepository;
@@ -34,14 +33,13 @@ public class PaymentConsumer {
             topics = "${environment.kafka.consumer.payment-validated.topics}",
             groupId = "${environment.kafka.consumer.payment-validated.group-id}",
             concurrency = "${environment.kafka.consumer.payment-validated.concurrency}",
-            autoStartup = "${environment.kafka.consumer.payment-validated.auto-startup}",
-            errorHandler = "retryErrorHandler"
+            autoStartup = "${environment.kafka.consumer.payment-validated.auto-startup}"
     )
 //    @Transactional("paymentTransactionManager")
     @Transactional
     public void listen(
             @Header(KafkaHeaders.RECEIVED_KEY) String messageKey,
-            String message, Acknowledgment ack) throws JsonProcessingException, RetryErrorException, IntegrationErrorException {
+            String message, Acknowledgment ack) throws JsonProcessingException, RetryErrorException {
         Payment payment = null;
         try {
             payment = this.mapper.readValue(message, Payment.class);
@@ -114,12 +112,4 @@ public class PaymentConsumer {
         }
     }
 
-//    @Bean
-//    public KafkaListenerErrorHandler validationErrorHandler() {
-//        return (m, e) -> {
-//            System.out.println("handle error: " + e.getMessage());
-//            // todo: send to DLQ topic
-//            return null;
-//        };
-//    }
 }

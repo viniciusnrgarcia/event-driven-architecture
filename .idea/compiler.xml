@@ -7,9 +7,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="payment-service" />
+        <module name="event-monitor" />
         <module name="payment-customer" />
         <module name="payment-batch-service" />
-        <module name="payment-service" />
         <module name="payment-fraud-process" />
         <module name="payment-api" />
         <module name="payment-connector-mq" />
@@ -22,6 +23,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="event-monitor" options="-parameters" />
       <module name="payment-api" options="-parameters" />
       <module name="payment-batch-service" options="-parameters" />
       <module name="payment-connector-mq" options="-parameters" />

@@ -1,5 +1,6 @@
 package br.com.vnrg.paymentservice.repository;
 
+import br.com.vnrg.paymentservice.domain.EventRetry;
 import br.com.vnrg.paymentservice.domain.EventStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,28 @@ public class EventStoreRepository {
 
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Transactional
+    public void save(EventRetry data) {
+        try {
+            MapSqlParameterSource param = new MapSqlParameterSource();
+            param.addValue("id", data.id());
+            param.addValue("topicName", data.topicName());
+            param.addValue("status", data.status());
+            param.addValue("createdBy", data.createdBy());
+            param.addValue("json", data.json());
+
+            jdbcClient.sql("INSERT INTO kafka_event_retry (id, topic_name, created_by, status, json) VALUES (:id, :topicName, :createdBy, :status, :json::jsonb)")
+                    .paramSource(param)
+                    .update();
+
+
+        } catch (Exception e) {
+            log.error("Error save retry data: {}, exception: {} ", data, e.getMessage());
             throw new RuntimeException(e);
         }
 

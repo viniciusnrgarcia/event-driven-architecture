@@ -86,6 +86,7 @@ public class PaymentRepository {
             this.jdbcClient.sql("""
                             INSERT INTO payment_event (status, uuid)
                             VALUES (:status, :uuid)
+                            ON CONFLICT DO NOTHING
                             """)
                     .param("status", payment.getStatus())
                     .param("uuid", payment.getUuid())

@@ -1,8 +1,13 @@
 package br.com.vnrg.paymentservice.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,16 +17,19 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.listener.RecordInterceptor;
 
 import java.util.HashMap;
 import java.util.Map;
 
+
 @Configuration
 @EnableKafka
+@Slf4j
+@RequiredArgsConstructor
 public class KafkaConsumerConfig {
 
     @Value("${environment.kafka.bootstrap-servers}")
@@ -30,13 +38,7 @@ public class KafkaConsumerConfig {
     @Value("${environment.kafka.idle-between-polls}")
     public Long idleBetweenPolls;
 
-    @Qualifier(value = "retryErrorHandler")
     private final DefaultErrorHandler defaultRetryErrorHandler;
-
-    public KafkaConsumerConfig(DefaultErrorHandler defaultRetryErrorHandler) {
-        this.defaultRetryErrorHandler = defaultRetryErrorHandler;
-    }
-
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
@@ -49,6 +51,17 @@ public class KafkaConsumerConfig {
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
         // factory.setConcurrency(1);
         factory.setCommonErrorHandler(this.defaultRetryErrorHandler); // todo: handle errors
+        factory.setRecordInterceptor(
+                (record, consumer) -> {
+                    try {
+                        var json = new ObjectMapper().writeValueAsString(record.value());
+                        log.info(json);
+                    } catch (JsonProcessingException e) {
+                        log.error("Error deserializing record: {}", record.value(), e);
+                    }
+                    return record;
+                });
+
         return factory;
     }
 
@@ -61,7 +74,7 @@ public class KafkaConsumerConfig {
     // @Bean
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:29092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.bootstrapServers);
         // props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-consumer");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

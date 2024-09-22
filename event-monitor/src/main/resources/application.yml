@@ -1,0 +1,66 @@
+server:
+  port: ${SERVER_PORT:0}
+
+spring:
+  application:
+    name: event-monitor
+  main:
+    banner-mode: OFF
+  datasource:
+    hikari:
+      connectionTimeout: ${HIKARI_MAXIMUM_CON_TIMEOUT:5000}
+      maximumPoolSize: ${HIKARI_MAXIMUM_POOL_SIZE:10}
+      minimum-idle: 10
+      idle-timeout: 20000
+      idleTimeout: ${HIKARI_IDLE_TIMEOUT:600000}
+      max-lifetime: 30000 # maximum lifetime in milliseconds of a connection in the pool after it is closed.
+      auto-commit: true #default auto-commit behavior.
+      # https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+    driver-class-name: org.postgresql.Driver
+    testWhileIdle: 'true'
+    password: ${DATASOURCE_PASSWORD:123}
+    username: ${DATASOURCE_USERNAME:admin}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/paymentdb?useSSL=false}
+    validationQuery: SELECT 1
+
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: "*"
+    web:
+      expose:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO} # INFO, DEBUG, ERROR
+    org.springframework: ${LOG_LEVEL_SPRING:INFO}
+    br.com.vnrg: ${LOG_LEVEL_PACKAGE:INFO}
+
+environment:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS:100} # ms
+    admin-listeners-control: ${KAFKA_ADMIN_LISTENERS_CONTROL:30000}
+    retry:
+      idle-between-polls: ${KAFKA_IDLE_BETWEEN_POLLS_RETRY:1000} # ms
+      interval: ${KAFKA_RETRY_INTERVAL:5000} # ms
+      max-attempts: ${KAFKA_RETRY_MAX_ATTEMPTS:5}

@@ -81,3 +81,13 @@ INSERT INTO kafka_listeners_control (listener_id, status) VALUES
     ('payment-batch-service-id', 1),
     ('payment-service-retry-id', 1)
 ;
+
+
+CREATE TABLE IF NOT EXISTS kafka_event_retry (
+    id varchar(100) null,
+    topic_name varchar(100) null,
+    created_at timestamp with time zone default current_timestamp,
+    created_by varchar(100) null,
+    status varchar(1) null,
+    json JSONB null
+);

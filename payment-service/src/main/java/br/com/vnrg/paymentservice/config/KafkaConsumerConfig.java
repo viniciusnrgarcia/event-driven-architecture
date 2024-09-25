@@ -1,14 +1,10 @@
 package br.com.vnrg.paymentservice.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import br.com.vnrg.paymentservice.exceptions.RetryErrorException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +13,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.CommonDelegatingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.listener.RecordInterceptor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +34,8 @@ public class KafkaConsumerConfig {
     @Value("${environment.kafka.idle-between-polls}")
     public Long idleBetweenPolls;
 
-    private final DefaultErrorHandler defaultRetryErrorHandler;
+    private final DefaultErrorHandler retryErrorHandler;
+    private final DefaultErrorHandler logErrorHandler;
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
@@ -50,17 +47,24 @@ public class KafkaConsumerConfig {
         factory.getContainerProperties().setPollTimeout(60_000);
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
         // factory.setConcurrency(1);
-        factory.setCommonErrorHandler(this.defaultRetryErrorHandler); // todo: handle errors
-        factory.setRecordInterceptor(
-                (record, consumer) -> {
-                    try {
-                        var json = new ObjectMapper().writeValueAsString(record.value());
-                        log.info(json);
-                    } catch (JsonProcessingException e) {
-                        log.error("Error deserializing record: {}", record.value(), e);
-                    }
-                    return record;
-                });
+
+        CommonDelegatingErrorHandler errorHandler = new CommonDelegatingErrorHandler(new DefaultErrorHandler());
+        errorHandler.addDelegate(RetryErrorException.class, this.retryErrorHandler);
+        errorHandler.addDelegate(Exception.class, this.logErrorHandler);
+
+        factory.setCommonErrorHandler(errorHandler);
+
+        // factory.setCommonErrorHandler(this.defaultRetryErrorHandler); // todo: handle errors
+//        factory.setRecordInterceptor(
+//                (record, consumer) -> {
+//                    try {
+//                        var json = new ObjectMapper().writeValueAsString(record.value());
+//                        log.info(json);
+//                    } catch (JsonProcessingException e) {
+//                        log.error("Error deserializing record: {}", record.value(), e);
+//                    }
+//                    return record;
+//                });
 
         return factory;
     }

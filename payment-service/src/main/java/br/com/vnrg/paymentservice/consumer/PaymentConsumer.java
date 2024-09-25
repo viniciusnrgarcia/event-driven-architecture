@@ -42,6 +42,7 @@ public class PaymentConsumer {
             groupId = "${environment.kafka.consumer.payment-validated.group-id}",
             concurrency = "${environment.kafka.consumer.payment-validated.concurrency}",
             autoStartup = "${environment.kafka.consumer.payment-validated.auto-startup}"
+            // errorHandler = "defaultCustomLogErrorHandler"
     )
 //    @Transactional("paymentTransactionManager")
     public void listen(
@@ -50,20 +51,22 @@ public class PaymentConsumer {
         Payment payment = null;
         try {
             payment = this.mapper.readValue(message, Payment.class);
-            this.eventStoreRepository.save(new EventStore(payment.getUuid(), "payment-service", mapper.writeValueAsString(payment)));
-
-            log.info("Consumed message key: {} message content: {} ", messageKey, message);
-
-            // Atualiza para em processamento
-            // exactly once commit
-            this.paymentRepository.updateStatus(payment, PaymentStatus.PROCESSING);
-            payment.setStatus(PaymentStatus.PROCESSING.getCode());
-            this.paymentRepository.savePaymentEvent(payment);
-            this.validatePayment(payment);
+//            this.eventStoreRepository.save(new EventStore(payment.getUuid(), "payment-service", mapper.writeValueAsString(payment)));
+//
+//            log.info("Consumed message key: {} message content: {} ", messageKey, message);
+//
+//            // Atualiza para em processamento
+//            // exactly once commit
+//            this.paymentRepository.updateStatus(payment, PaymentStatus.PROCESSING);
+//            payment.setStatus(PaymentStatus.PROCESSING.getCode());
+//            this.paymentRepository.savePaymentEvent(payment);
+//            this.validatePayment(payment);
+            // throw new RetryErrorException("Retry Error");
+            throw new RuntimeException("Error e");
 
         } catch (RetryErrorException retryErrorException) {
             log.error("Retry Error: {}", retryErrorException.getMessage());
-            throw retryErrorException;
+            // throw retryErrorException;
 
         } catch (Exception e) {
             log.error("Error: {}", e.getMessage());

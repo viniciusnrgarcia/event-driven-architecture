@@ -1,5 +1,6 @@
 package br.com.vnrg.paymentservice.config;
 
+import br.com.vnrg.paymentservice.exceptions.DeadLetterTopicException;
 import br.com.vnrg.paymentservice.exceptions.RetryErrorException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.CommonDelegatingErrorHandler;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
@@ -36,6 +38,10 @@ public class KafkaConsumerConfig {
 
     private final DefaultErrorHandler retryErrorHandler;
     private final DefaultErrorHandler logErrorHandler;
+    private final DefaultErrorHandler deadLetterHandler;
+
+
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
@@ -48,9 +54,11 @@ public class KafkaConsumerConfig {
         // loop between org. apache. kafka. clients. consumer. Consumer. poll(Duration) calls. Defaults to 0 - no idling.
         // factory.setConcurrency(1);
 
+
         CommonDelegatingErrorHandler errorHandler = new CommonDelegatingErrorHandler(new DefaultErrorHandler());
         errorHandler.addDelegate(RetryErrorException.class, this.retryErrorHandler);
         errorHandler.addDelegate(Exception.class, this.logErrorHandler);
+        errorHandler.addDelegate(DeadLetterTopicException.class, this.deadLetterHandler);
 
         factory.setCommonErrorHandler(errorHandler);
 
